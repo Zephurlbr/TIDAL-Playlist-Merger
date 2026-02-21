@@ -23,7 +23,7 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 
 ## Demo
 
-![Demo](Assets/Demo.mp4)
+![Demo](Assets/Demo.gif)
 
 ## Quick Start
 
