@@ -11,7 +11,7 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 ![JavaScript](https://img.shields.io/badge/JavaScript-0.9%25-yellow.svg)
 ![HTML](https://img.shields.io/badge/HTML-0.5%25-orange.svg)
 
-![TIDAL Playlist Merger Screenshot](Assets/pic1.png)
+![TIDAL Playlist Merger Screenshot](Assets/not-a-cat.png)
 
 ## Features
 
@@ -23,17 +23,7 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 
 ## Demo
 
-### Connect
-![Connect Demo](Assets/clips/1-connect.gif)
-
-### Adding Playlists
-![Playlists Demo](Assets/clips/2-playlists.gif)
-
-### Merging
-![Merge Demo](Assets/clips/3-merge.gif)
-
-### Duplicate Detection
-![Duplicates Demo](Assets/clips/4-dupes.gif)
+![Demo](Assets/Gif.gif)
 
 ## Quick Start
 
