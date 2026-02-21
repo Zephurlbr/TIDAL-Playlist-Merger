@@ -2,7 +2,16 @@
 
 Merge multiple TIDAL playlists into one. No API keys or developer registration required.
 
-![Screenshot placeholder - add your screenshot here]
+![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)
+![Python](https://img.shields.io/badge/Python-38.5%25-blue.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-28.0%25-blue.svg)
+![CSS](https://img.shields.io/badge/CSS-25.3%25-purple.svg)
+![Batchfile](https://img.shields.io/badge/Batchfile-3.5%25-green.svg)
+![Shell](https://img.shields.io/badge/Shell-3.3%25-green.svg)
+![JavaScript](https://img.shields.io/badge/JavaScript-0.9%25-yellow.svg)
+![HTML](https://img.shields.io/badge/HTML-0.5%25-orange.svg)
+
+![TIDAL Playlist Merger Screenshot](Assets/pic1.png)
 
 ## Features
 
@@ -11,6 +20,20 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 - Real-time progress tracking
 - No TIDAL Developer account needed
 - Session persistence across restarts
+
+## Demo
+
+### Connect
+![Connect Demo](Assets/clips/1-connect.gif)
+
+### Adding Playlists
+![Playlists Demo](Assets/clips/2-playlists.gif)
+
+### Merging
+![Merge Demo](Assets/clips/3-merge.gif)
+
+### Duplicate Detection
+![Duplicates Demo](Assets/clips/4-dupes.gif)
 
 ## Quick Start
 
@@ -54,21 +77,6 @@ https://open.tidal.com/playlist/<uuid>
 <raw-uuid>
 ```
 
-## API Reference
-
-Base URL: `http://localhost:8000`
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/auth/login` | GET | Get device login URL |
-| `/auth/status` | GET | Check auth status |
-| `/auth/logout` | POST | Logout and delete session |
-| `/api/playlist/resolve` | POST | Resolve playlist from URL |
-| `/api/merge` | POST | Merge playlists (SSE stream) |
-| `/docs` | GET | Swagger UI |
-
-Full API documentation available at `/docs` when running.
-
 ## Tech Stack
 
 - **Backend:** Python, FastAPI, uvicorn, [tidalapi](https://github.com/EbbLabs/python-tidal)
@@ -91,6 +99,21 @@ TIDAL-Playlist-Merger/
 ├── start.bat           # Windows launcher
 └── start.sh            # Unix launcher
 ```
+
+## API Reference
+
+Base URL: `http://localhost:8000`
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/auth/login` | GET | Get device login URL |
+| `/auth/status` | GET | Check auth status |
+| `/auth/logout` | POST | Logout and delete session |
+| `/api/playlist/resolve` | POST | Resolve playlist from URL |
+| `/api/merge` | POST | Merge playlists (SSE stream) |
+| `/docs` | GET | Swagger UI |
+
+Full API documentation available at `/docs` when running.
 
 ## Configuration
 
@@ -118,8 +141,9 @@ VITE_API_BASE=http://localhost:8000
 
 - Playlists must be **public**
 - Max **200 playlists** per merge
-- Max **10,000 tracks** per merged playlist (Tidal limit)
+- Max **10,000 tracks per playlist** (TIDAL limit)
 - **Duplicates** are automatically removed
+- Session tokens are stored locally in `server-python/tidal_session.json`
 
 ## License
 
