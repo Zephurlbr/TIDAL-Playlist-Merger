@@ -3,7 +3,7 @@ import asyncio
 import sys
 import os
 from typing import List
-import anyio
+from anyio import to_thread
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -33,7 +33,7 @@ async def resolve_playlist(request: ResolveRequest, _: bool = Depends(require_au
         raise HTTPException(status_code=400, detail=parsed['error'])
     
     try:
-        playlist = await anyio.to_thread.run_sync(
+        playlist = await to_thread.run_sync(
             tidal_service.get_playlist_by_id, parsed['id']
         )
         return playlist

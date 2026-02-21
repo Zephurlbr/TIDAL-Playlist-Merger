@@ -1,11 +1,12 @@
 import logging
 import asyncio
 from typing import List, Callable, Optional, Dict, Set, Any
-import anyio
+from anyio import to_thread
 
 logger = logging.getLogger(__name__)
 
 MAX_DUPLICATES_RETURNED = 200
+TRACK_LIMIT = 10000
 
 class MergeService:
     async def merge_playlists(
@@ -46,14 +47,14 @@ class MergeService:
             )
             
             try:
-                playlist_info = await anyio.to_thread.run_sync(
+                playlist_info = await to_thread.run_sync(
                     tidal_service.get_playlist_by_id, playlist_id
                 )
                 playlist_names[playlist_id] = playlist_info.get('name', f'Playlist {i + 1}')
             except Exception:
                 playlist_names[playlist_id] = f'Playlist {i + 1}'
             
-            tracks = await anyio.to_thread.run_sync(
+            tracks = await to_thread.run_sync(
                 tidal_service.get_playlist_tracks, playlist_id
             )
             playlist_track_counts.append(len(tracks))
@@ -131,6 +132,12 @@ class MergeService:
         if not all_tracks:
             raise Exception("No tracks found in the selected playlists")
         
+        was_truncated = len(all_tracks) > TRACK_LIMIT
+        truncated_count = max(0, len(all_tracks) - TRACK_LIMIT)
+        if was_truncated:
+            all_tracks = all_tracks[:TRACK_LIMIT]
+            logger.info(f"Truncated tracks from {len(all_tracks) + truncated_count} to {TRACK_LIMIT}")
+        
         if total_duplicates > 0:
             if intra_playlist_duplicates > 0 and keep_it_tidy:
                 await send_progress(
@@ -144,7 +151,7 @@ class MergeService:
             await send_progress(f"Found {len(all_tracks)} unique tracks", 50)
         
         await send_progress("Creating new playlist...", 60)
-        new_playlist = await anyio.to_thread.run_sync(
+        new_playlist = await to_thread.run_sync(
             tidal_service.create_playlist, new_playlist_name
         )
         new_playlist_id = new_playlist['id']
@@ -169,13 +176,13 @@ class MergeService:
             )
         
         try:
-            await anyio.to_thread.run_sync(
+            await to_thread.run_sync(
                 tidal_service.add_tracks_to_playlist, new_playlist_id, all_tracks, sync_batch_progress
             )
         except Exception as e:
             logger.error(f"Failed to add tracks, cleaning up playlist {new_playlist_id}: {e}")
             await send_progress("Merge failed, cleaning up...", 0)
-            await anyio.to_thread.run_sync(
+            await to_thread.run_sync(
                 tidal_service.delete_playlist, new_playlist_id
             )
             raise Exception(f"Failed to add tracks to playlist: {str(e)}")
@@ -193,7 +200,9 @@ class MergeService:
             'intraPlaylistDuplicates': intra_playlist_duplicates,
             'playlistCounts': playlist_track_counts,
             'duplicates': duplicates_returned,
-            'totalDuplicateTracks': len(duplicate_details)
+            'totalDuplicateTracks': len(duplicate_details),
+            'wasTruncated': was_truncated,
+            'truncatedCount': truncated_count
         }
 
 merge_service = MergeService()

@@ -6,7 +6,7 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 
 ## Features
 
-- Merge up to 10 playlists at once
+- Merge up to 200 playlists at once
 - Automatic duplicate track removal
 - Real-time progress tracking
 - No TIDAL Developer account needed
@@ -41,7 +41,7 @@ Open http://localhost:8000 and connect your TIDAL account.
 ### Merging Playlists
 
 1. Paste a playlist URL and press Enter
-2. Repeat for additional playlists (max 10)
+2. Repeat for additional playlists (max 200)
 3. Enter a name for your merged playlist
 4. Click **"Merge Playlists"**
 5. Watch progress in real-time
@@ -117,7 +117,8 @@ VITE_API_BASE=http://localhost:8000
 ## Notes
 
 - Playlists must be **public**
-- Max **10 playlists** per merge
+- Max **200 playlists** per merge
+- Max **10,000 tracks** per merged playlist (Tidal limit)
 - **Duplicates** are automatically removed
 
 ## License

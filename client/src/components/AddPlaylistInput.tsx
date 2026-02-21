@@ -17,7 +17,7 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
     setError(null);
 
     if (maxReached) {
-      setError('Maximum 10 playlists allowed');
+      setError('Maximum 200 playlists allowed');
       return;
     }
 

@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import AddPlaylistInput from './components/AddPlaylistInput';
 import PlaylistPreview from './components/PlaylistPreview';
 import './App.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
-const MAX_PLAYLISTS = 10;
+const MAX_PLAYLISTS = 200;
+const TRACK_LIMIT = 10000;
 
 interface Playlist {
   id: string;
@@ -32,6 +33,8 @@ interface MergeResult {
   playlistCounts: number[];
   duplicates: DuplicateTrack[];
   totalDuplicateTracks: number;
+  wasTruncated: boolean;
+  truncatedCount: number;
 }
 
 type AuthState = 'idle' | 'checking' | 'polling' | 'authenticated' | 'error';
@@ -226,6 +229,9 @@ function App() {
                     message += ` (${result.duplicatesRemoved} duplicates removed)`;
                   }
                 }
+                if (result.wasTruncated) {
+                  message += ` Note: Tidal limits playlists to ${TRACK_LIMIT.toLocaleString()} tracks - ${result.truncatedCount.toLocaleString()} additional tracks were not added.`;
+                }
                 setStatus(message);
                 setLoading(false);
                 setMergeSuccess(true);
@@ -410,7 +416,7 @@ function App() {
         />
         <p className="hint-text">
           Note: Playlists must be public to be accessible. 
-          Maximum {MAX_PLAYLISTS} playlists.
+          Maximum {MAX_PLAYLISTS} playlists. Tidal has a {TRACK_LIMIT.toLocaleString()} track limit per playlist.
         </p>
       </div>
 
