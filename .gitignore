@@ -1,23 +1,35 @@
-# Environment variables
-.env
-.env.local
+# Environment variables 
+**/.env
+**/.env.local
+**/.env.*
 
-# Dependencies
+# Dependencies 
 node_modules/
 venv/
+env/
+.venv/
 
-# Build outputs
+# Build outputs 
 dist/
+dist-ssr/
+*.local
 
-# Python
+# Python artifacts 
 __pycache__/
 *.py[cod]
+*$py.class
+.pytest_cache/
+.python-version
 
-# Sensitive
+# Sensitive TIDAL data 
 tidal_session.json
+*.session
 
-# IDE/OS
+# IDE/OS 
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
