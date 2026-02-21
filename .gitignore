@@ -1,0 +1,23 @@
+# Environment variables
+.env
+.env.local
+
+# Dependencies
+node_modules/
+venv/
+
+# Build outputs
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Sensitive
+tidal_session.json
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
