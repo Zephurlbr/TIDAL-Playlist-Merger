@@ -23,7 +23,7 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 
 ## Demo
 
-![Demo](Assets/not-a-dog.mov)
+<video src="Assets/not-a-dog.mov" controls width="100%"></video>
 
 ## Quick Start
 
