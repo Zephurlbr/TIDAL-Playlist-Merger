@@ -11,7 +11,7 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 ![JavaScript](https://img.shields.io/badge/JavaScript-0.9%25-yellow.svg)
 ![HTML](https://img.shields.io/badge/HTML-0.5%25-orange.svg)
 
-![TIDAL Playlist Merger Screenshot](Assets/not-a-cat.png)
+![TIDAL Playlist Merger Screenshot](Assets/vid.png)
 
 ## Features
 
@@ -23,7 +23,7 @@ Merge multiple TIDAL playlists into one. No API keys or developer registration r
 
 ## Demo
 
-![Demo](Assets/Demo.mov)
+![Demo](Assets/Demo.mp4)
 
 ## Quick Start
 
