@@ -1,6 +1,6 @@
 # TIDAL Playlist Merger
 
-Merge multiple TIDAL playlists into one. No API keys or developer registration required.
+Merge multiple TIDAL playlists into one with duplicate track removal. No API keys or developer registration required.
 
 ![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)
 ![Python](https://img.shields.io/badge/Python-38.5%25-blue.svg)
