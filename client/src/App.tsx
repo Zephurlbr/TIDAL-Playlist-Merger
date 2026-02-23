@@ -1,47 +1,20 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import AddPlaylistInput from './components/AddPlaylistInput';
+import UnifiedInput from './components/UnifiedInput';
 import PlaylistPreview from './components/PlaylistPreview';
+import MyPlaylistsModal from './components/MyPlaylistsModal';
+import type { Content, MergeResult, DuplicateTrack } from './types';
 import './App.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 const MAX_PLAYLISTS = 200;
 const TRACK_LIMIT = 10000;
 
-interface Playlist {
-  id: string;
-  name: string;
-  trackCount: number;
-  coverUrl: string | null;
-  fallbackCovers: string[];
-}
-
-interface DuplicateTrack {
-  name: string;
-  artist: string;
-  appearedIn: string[] | string;
-  type?: 'cross' | 'intra';
-}
-
-interface MergeResult {
-  id: string;
-  trackCount: number;
-  totalFetched: number;
-  duplicatesRemoved: number;
-  crossPlaylistDuplicates: number;
-  intraPlaylistDuplicates: number;
-  playlistCounts: number[];
-  duplicates: DuplicateTrack[];
-  totalDuplicateTracks: number;
-  wasTruncated: boolean;
-  truncatedCount: number;
-}
-
 type AuthState = 'idle' | 'checking' | 'polling' | 'authenticated' | 'error';
 
 function App() {
   const [authState, setAuthState] = useState<AuthState>('idle');
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [playlists, setPlaylists] = useState<Content[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [status, setStatus] = useState('');
@@ -53,7 +26,11 @@ function App() {
   const [mergeResult, setMergeResult] = useState<MergeResult | null>(null);
   const [showDuplicatesModal, setShowDuplicatesModal] = useState(false);
   const [showAllPlaylistsModal, setShowAllPlaylistsModal] = useState(false);
+  const [showMyPlaylistsModal, setShowMyPlaylistsModal] = useState(false);
   const [deepClean, setDeepClean] = useState(false);
+  const [userPlaylists, setUserPlaylists] = useState<Content[]>([]);
+  const [favorites, setFavorites] = useState<Content | null>(null);
+  const [loadingUserPlaylists, setLoadingUserPlaylists] = useState(false);
 
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -102,19 +79,34 @@ function App() {
     };
   }, [authState]);
 
+  useEffect(() => {
+    if (authState === 'authenticated') {
+      fetchUserPlaylists();
+    }
+  }, [authState]);
+
+  const fetchUserPlaylists = async () => {
+    setLoadingUserPlaylists(true);
+    try {
+      const response = await axios.get(`${API_BASE}/api/user/playlists`, { timeout: 15000 });
+      setUserPlaylists(response.data.playlists || []);
+      setFavorites(response.data.favorites || null);
+    } catch (error) {
+      console.error('Failed to fetch user playlists', error);
+    } finally {
+      setLoadingUserPlaylists(false);
+    }
+  };
+
   const isAuthenticated = authState === 'authenticated';
 
-  const handleAddPlaylist = async (url: string) => {
-    setAuthError(null);
-    const response = await axios.post(`${API_BASE}/api/playlist/resolve`, { url }, { timeout: 10000 });
-    const playlist = response.data;
-
-    if (playlists.find(p => p.id === playlist.id)) {
-      throw new Error('Playlist already added');
+  const handleAddContent = async (content: Content) => {
+    if (playlists.find(p => p.id === content.id)) {
+      throw new Error('Content already added');
     }
 
-    setPlaylists(prev => [playlist, ...prev]);
-    setSelectedIds(prev => new Set(prev).add(playlist.id));
+    setPlaylists(prev => [content, ...prev]);
+    setSelectedIds(prev => new Set(prev).add(content.id));
     setMergeSuccess(false);
     setMergeResult(null);
   };
@@ -159,7 +151,7 @@ function App() {
     const selectedPlaylists = playlists.filter(p => selectedIds.has(p.id));
     
     if (selectedPlaylists.length < 2) {
-      setStatus('Please select at least 2 playlists to merge.');
+      setStatus('Please select at least 2 items to merge.');
       return;
     }
     if (!newPlaylistName.trim()) {
@@ -178,7 +170,8 @@ function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          playlistIds: selectedPlaylists.map(p => p.id),
+          contentIds: selectedPlaylists.map(p => p.id),
+          contentTypes: selectedPlaylists.map(p => p.contentType),
           name: newPlaylistName.trim(),
           keepItTidy: deepClean
         })
@@ -225,7 +218,7 @@ function App() {
                 let message = `Done! Created playlist with ${result.trackCount} tracks.`;
                 if (result.duplicatesRemoved > 0) {
                   if (result.intraPlaylistDuplicates > 0 && deepClean) {
-                    message += ` (${result.duplicatesRemoved} duplicates removed, including ${result.intraPlaylistDuplicates} within playlists)`;
+                    message += ` (${result.duplicatesRemoved} duplicates removed, including ${result.intraPlaylistDuplicates} within items)`;
                   } else {
                     message += ` (${result.duplicatesRemoved} duplicates removed)`;
                   }
@@ -283,6 +276,8 @@ function App() {
       setMergeResult(null);
       setStatus('');
       setDeepClean(false);
+      setUserPlaylists([]);
+      setFavorites(null);
     } catch (error) {
       console.error('Failed to logout', error);
     }
@@ -311,7 +306,7 @@ function App() {
               </p>
             )}
             <div className="duplicates-list">
-              {mergeResult.duplicates.map((dup, index) => (
+              {mergeResult.duplicates.map((dup: DuplicateTrack, index: number) => (
                 <div key={index} className="duplicate-item">
                   <div className="duplicate-track">
                     <span className="duplicate-name">{dup.name}</span>
@@ -336,7 +331,7 @@ function App() {
       <div className="modal-overlay" onClick={() => setShowAllPlaylistsModal(false)}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
-            <h3>All Playlists ({playlists.length})</h3>
+            <h3>All Items ({playlists.length})</h3>
             <button className="modal-close" onClick={() => setShowAllPlaylistsModal(false)}>×</button>
           </div>
           <div className="modal-body">
@@ -349,6 +344,8 @@ function App() {
                   trackCount={playlist.trackCount}
                   coverUrl={playlist.coverUrl}
                   fallbackCovers={playlist.fallbackCovers}
+                  contentType={playlist.contentType}
+                  isFavorites={playlist.isFavorites}
                   selected={selectedIds.has(playlist.id)}
                   onToggle={() => handleTogglePlaylist(playlist.id)}
                   onRemove={() => handleRemovePlaylist(playlist.id)}
@@ -433,11 +430,19 @@ function App() {
     <div className="container">
       <DuplicatesModal />
       <AllPlaylistsModal />
+      <MyPlaylistsModal
+        isOpen={showMyPlaylistsModal}
+        onClose={() => setShowMyPlaylistsModal(false)}
+        favorites={favorites}
+        playlists={userPlaylists}
+        onAdd={handleAddContent}
+        loading={loadingUserPlaylists}
+      />
       
       <div className="header-row">
         <div>
           <h1>TIDAL Playlist Merger</h1>
-          <p className="subtitle">Paste playlist links to merge them into one.</p>
+          <p className="subtitle">Merge playlists, albums, mixes, and favorites into one.</p>
         </div>
         <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
@@ -457,20 +462,29 @@ function App() {
       )}
 
       <div className="add-playlist-section">
-        <AddPlaylistInput 
-          onAdd={handleAddPlaylist} 
+        <UnifiedInput 
+          onAdd={handleAddContent}
           disabled={loading}
           maxReached={playlists.length >= MAX_PLAYLISTS}
         />
-<p className="hint-text">
-          Maximum {MAX_PLAYLISTS} playlists. Tidal has a {TRACK_LIMIT.toLocaleString()} track limit per playlist.
+        <div className="input-actions">
+          <button 
+            onClick={() => setShowMyPlaylistsModal(true)}
+            className="my-playlists-btn"
+            disabled={loading}
+          >
+            My Playlists
+          </button>
+        </div>
+        <p className="hint-text">
+          Maximum {MAX_PLAYLISTS} items. Tidal has a {TRACK_LIMIT.toLocaleString()} track limit per playlist.
         </p>
       </div>
 
       {playlists.length > 0 && (
         <>
           <div className="playlists-header">
-            <h2>Added Playlists ({playlists.length})</h2>
+            <h2>Added Items ({playlists.length})</h2>
             <button onClick={handleClear} className="clear-button">
               Clear & Start Over
             </button>
@@ -485,6 +499,8 @@ function App() {
                 trackCount={playlist.trackCount}
                 coverUrl={playlist.coverUrl}
                 fallbackCovers={playlist.fallbackCovers}
+                contentType={playlist.contentType}
+                isFavorites={playlist.isFavorites}
                 selected={selectedIds.has(playlist.id)}
                 onToggle={() => handleTogglePlaylist(playlist.id)}
                 onRemove={() => handleRemovePlaylist(playlist.id)}
@@ -498,7 +514,7 @@ function App() {
                 className="view-all-playlists-btn"
                 onClick={() => setShowAllPlaylistsModal(true)}
               >
-                View All {playlists.length} Playlists
+                View All {playlists.length} Items
               </button>
             </div>
           )}
@@ -528,7 +544,7 @@ function App() {
             <span className="checkbox-text">Deep Clean</span>
             <span className="tooltip-trigger">?</span>
             <span className="tooltip-text">
-              Also remove duplicate songs within the same playlist, not just across playlists
+              Also remove duplicate songs within the same item, not just across items
             </span>
           </label>
         </div>

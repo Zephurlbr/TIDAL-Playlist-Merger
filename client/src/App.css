@@ -886,3 +886,442 @@ input[type="checkbox"]:hover {
   flex-direction: column;
   gap: 0.75rem;
 }
+
+/* ========== V2 NEW STYLES ========== */
+
+/* Content Type Badge */
+.content-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--badge-color, #3498db);
+  color: white;
+}
+
+.content-type-badge.small {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+}
+
+.content-type-badge.medium {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+}
+
+.badge-icon {
+  font-size: 0.8em;
+}
+
+.badge-label {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Favorites Special Styling */
+.playlist-preview.is-favorites {
+  border: 3px double #e74c3c;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.05));
+}
+
+.playlist-preview.is-favorites:hover {
+  border-color: #e74c3c;
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+}
+
+.playlist-preview.is-favorites .preview-cover {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.favorites-cover-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.favorites-icon {
+  font-size: 1.5rem;
+}
+
+/* Favorites Card in My Playlists Modal */
+.favorites-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 3px double #e74c3c;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(231, 76, 60, 0.05));
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.favorites-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+}
+
+.favorites-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.favorites-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.favorites-count {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Search Dropdown */
+.unified-input-container {
+  position: relative;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(30, 30, 30, 0.98);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  margin-top: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  position: sticky;
+  top: 0;
+  background: rgba(30, 30, 30, 0.98);
+}
+
+.dropdown-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.dropdown-close:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-results {
+  padding: 0.5rem 0;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.search-result-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.result-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.result-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-artist {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.result-count {
+  font-size: 0.75rem;
+}
+
+.dropdown-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.loading-spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+/* My Playlists Modal */
+.my-playlists-modal {
+  max-width: 600px;
+  max-height: 80vh;
+}
+
+.my-playlists-modal .modal-body {
+  max-height: calc(80vh - 60px);
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.playlist-search-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tidal-white);
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.playlist-search-input:focus {
+  outline: none;
+  border-color: var(--tidal-yellow);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.playlist-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.playlist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.playlist-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.playlist-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.playlist-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.playlist-count {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Add Button */
+.add-btn {
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 220, 0, 0.15);
+  color: var(--tidal-yellow);
+  border: 1px solid var(--tidal-yellow);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.add-btn:hover {
+  background: var(--tidal-yellow);
+  color: var(--tidal-black);
+}
+
+/* Load More Button */
+.load-more-btn {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  border: 1px dashed var(--glass-border);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.load-more-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tidal-white);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* My Playlists Button */
+.my-playlists-btn {
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 220, 0, 0.15);
+  color: var(--tidal-yellow);
+  border: 1px solid var(--tidal-yellow);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.my-playlists-btn:hover {
+  background: var(--tidal-yellow);
+  color: var(--tidal-black);
+}
+
+.my-playlists-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Input Actions Row */
+.input-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+/* Preview Meta Row */
+.preview-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* Content Cover */
+.content-cover {
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.content-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.content-cover.cover-small {
+  width: 48px;
+  height: 48px;
+}
+
+.content-cover.cover-medium {
+  width: 64px;
+  height: 64px;
+}
+
+.content-cover.cover-large {
+  width: 80px;
+  height: 80px;
+}
+
+.content-cover.cover-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2px;
+}
+
+.content-cover.cover-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.content-cover.cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 220, 0, 0.2), rgba(255, 220, 0, 0.1));
+}
+
+.content-cover.cover-placeholder span {
+  font-size: 1.2rem;
+}
+
+.content-cover.cover-small.cover-placeholder span {
+  font-size: 1rem;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Modal Loading */
+.modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Inline Warning */
+.inline-warning {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--tidal-yellow);
+  margin-top: 0.5rem;
+}

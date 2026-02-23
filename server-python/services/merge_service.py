@@ -11,14 +11,15 @@ TRACK_LIMIT = 10000
 class MergeService:
     async def merge_playlists(
         self,
-        playlist_ids: List[str],
+        content_ids: List[str],
+        content_types: List[str],
         new_playlist_name: str,
         on_progress: Optional[Callable[[dict], Any]] = None,
         keep_it_tidy: bool = False
     ) -> dict:
         from . import tidal_service
         
-        logger.info(f"Merging playlists: {playlist_ids} into {new_playlist_name} (keep_it_tidy={keep_it_tidy})")
+        logger.info(f"Merging content: {list(zip(content_ids, content_types))} into {new_playlist_name} (keep_it_tidy={keep_it_tidy})")
         
         async def send_progress(message: str, progress: float = 0):
             if on_progress:
@@ -33,33 +34,35 @@ class MergeService:
         total_fetched = 0
         cross_playlist_duplicates = 0
         intra_playlist_duplicates = 0
-        playlist_track_counts = []
+        content_track_counts = []
         
         first_occurrence: Dict[str, dict] = {}
         intra_duplicate_counts: Dict[str, int] = {}
-        playlist_names: Dict[str, str] = {}
-        total_playlists = len(playlist_ids)
+        content_names: Dict[str, str] = {}
+        total_content = len(content_ids)
         
-        for i, playlist_id in enumerate(playlist_ids):
+        for i, (content_id, content_type) in enumerate(zip(content_ids, content_types)):
+            type_label = content_type.capitalize()
+            
             await send_progress(
-                f"Fetching playlist {i + 1} of {total_playlists}...",
-                (i / total_playlists) * 40 if total_playlists > 0 else 0
+                f"Fetching {type_label} {i + 1} of {total_content}...",
+                (i / total_content) * 40 if total_content > 0 else 0
             )
             
             try:
-                playlist_info = await to_thread.run_sync(
-                    tidal_service.get_playlist_by_id, playlist_id
+                content_info = await to_thread.run_sync(
+                    tidal_service.tidal_service.get_content_by_type, content_id, content_type
                 )
-                playlist_names[playlist_id] = playlist_info.get('name', f'Playlist {i + 1}')
+                content_names[content_id] = content_info.get('name', f'{type_label} {i + 1}')
             except Exception:
-                playlist_names[playlist_id] = f'Playlist {i + 1}'
+                content_names[content_id] = f'{type_label} {i + 1}'
             
             tracks = await to_thread.run_sync(
-                tidal_service.get_playlist_tracks, playlist_id
+                tidal_service.tidal_service.get_content_tracks, content_id, content_type
             )
-            playlist_track_counts.append(len(tracks))
+            content_track_counts.append(len(tracks))
             
-            tracks_in_this_playlist: Set[str] = set()
+            tracks_in_this_content: Set[str] = set()
             
             for item in tracks:
                 track_id = item.get('id')
@@ -69,10 +72,10 @@ class MergeService:
                 if track_id:
                     total_fetched += 1
                     
-                    is_intra_duplicate = track_id in tracks_in_this_playlist
+                    is_intra_duplicate = track_id in tracks_in_this_content
                     is_cross_duplicate = track_id in seen_track_ids and not is_intra_duplicate
                     
-                    tracks_in_this_playlist.add(track_id)
+                    tracks_in_this_content.add(track_id)
                     
                     if is_intra_duplicate:
                         intra_playlist_duplicates += 1
@@ -83,9 +86,9 @@ class MergeService:
                     elif is_cross_duplicate:
                         cross_playlist_duplicates += 1
                         if track_id in first_occurrence:
-                            current_playlist = playlist_names[playlist_id]
-                            if current_playlist not in first_occurrence[track_id]['playlists']:
-                                first_occurrence[track_id]['playlists'].append(current_playlist)
+                            current_content = content_names[content_id]
+                            if current_content not in first_occurrence[track_id]['playlists']:
+                                first_occurrence[track_id]['playlists'].append(current_content)
                     
                     else:
                         seen_track_ids.add(track_id)
@@ -93,7 +96,7 @@ class MergeService:
                         first_occurrence[track_id] = {
                             'name': track_name,
                             'artist': track_artist,
-                            'playlists': [playlist_names[playlist_id]]
+                            'playlists': [content_names[content_id]]
                         }
         
         duplicate_details: List[dict] = []
@@ -130,7 +133,7 @@ class MergeService:
                    f"Cross-playlist dupes: {cross_playlist_duplicates}, Intra-playlist dupes: {intra_playlist_duplicates}")
         
         if not all_tracks:
-            raise Exception("No tracks found in the selected playlists")
+            raise Exception("No tracks found in the selected content")
         
         was_truncated = len(all_tracks) > TRACK_LIMIT
         truncated_count = max(0, len(all_tracks) - TRACK_LIMIT)
@@ -142,7 +145,7 @@ class MergeService:
             if intra_playlist_duplicates > 0 and keep_it_tidy:
                 await send_progress(
                     f"Found {len(all_tracks)} unique tracks ({total_duplicates} duplicates removed, "
-                    f"including {intra_playlist_duplicates} within playlists)",
+                    f"including {intra_playlist_duplicates} within content)",
                     50
                 )
             else:
@@ -152,7 +155,7 @@ class MergeService:
         
         await send_progress("Creating new playlist...", 60)
         new_playlist = await to_thread.run_sync(
-            tidal_service.create_playlist, new_playlist_name
+            tidal_service.tidal_service.create_playlist, new_playlist_name
         )
         new_playlist_id = new_playlist['id']
         
@@ -177,13 +180,13 @@ class MergeService:
         
         try:
             await to_thread.run_sync(
-                tidal_service.add_tracks_to_playlist, new_playlist_id, all_tracks, sync_batch_progress
+                tidal_service.tidal_service.add_tracks_to_playlist, new_playlist_id, all_tracks, sync_batch_progress
             )
         except Exception as e:
             logger.error(f"Failed to add tracks, cleaning up playlist {new_playlist_id}: {e}")
             await send_progress("Merge failed, cleaning up...", 0)
             await to_thread.run_sync(
-                tidal_service.delete_playlist, new_playlist_id
+                tidal_service.tidal_service.delete_playlist, new_playlist_id
             )
             raise Exception(f"Failed to add tracks to playlist: {str(e)}")
         
@@ -198,11 +201,12 @@ class MergeService:
             'duplicatesRemoved': total_duplicates,
             'crossPlaylistDuplicates': cross_playlist_duplicates,
             'intraPlaylistDuplicates': intra_playlist_duplicates,
-            'playlistCounts': playlist_track_counts,
+            'playlistCounts': content_track_counts,
             'duplicates': duplicates_returned,
             'totalDuplicateTracks': len(duplicate_details),
             'wasTruncated': was_truncated,
             'truncatedCount': truncated_count
         }
+
 
 merge_service = MergeService()

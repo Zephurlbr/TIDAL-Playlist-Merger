@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import type { ContentType } from '../types';
+import ContentTypeBadge from './ContentTypeBadge';
 
 interface PlaylistPreviewProps {
   id: string;
@@ -6,9 +8,11 @@ interface PlaylistPreviewProps {
   trackCount: number;
   coverUrl: string | null;
   fallbackCovers: string[];
+  contentType: ContentType;
   selected: boolean;
   onToggle: () => void;
   onRemove: () => void;
+  isFavorites?: boolean;
 }
 
 function PlaylistPreview({
@@ -16,7 +20,9 @@ function PlaylistPreview({
   trackCount,
   coverUrl,
   fallbackCovers,
+  contentType,
   selected,
+  isFavorites,
   onToggle,
   onRemove
 }: PlaylistPreviewProps) {
@@ -29,9 +35,11 @@ function PlaylistPreview({
   const hasFallbacks = fallbackCovers && fallbackCovers.length > 0;
 
   return (
-    <div className={`playlist-preview ${selected ? 'selected' : ''}`}>
+    <div className={`playlist-preview ${selected ? 'selected' : ''} ${isFavorites ? 'is-favorites' : ''}`}>
       <div className="preview-cover">
-        {coverUrl && !imageError ? (
+        {isFavorites ? (
+          <div className="favorites-cover-icon">❤️</div>
+        ) : coverUrl && !imageError ? (
           <img src={coverUrl} alt={name} onError={handleImageError} />
         ) : hasFallbacks ? (
           <div className="cover-grid">
@@ -40,7 +48,9 @@ function PlaylistPreview({
             ))}
           </div>
         ) : (
-          <div className="cover-placeholder">🎵</div>
+          <div className="cover-placeholder">
+            {contentType === 'album' ? '💿' : contentType === 'mix' ? '🎲' : '🎵'}
+          </div>
         )}
       </div>
       <div className="preview-info">
@@ -48,7 +58,10 @@ function PlaylistPreview({
           <input type="checkbox" checked={selected} onChange={onToggle} />
           <div className="info-text">
             <span className="preview-name">{name}</span>
-            <span className="preview-count">{trackCount} tracks</span>
+            <div className="preview-meta">
+              <ContentTypeBadge type={contentType} size="small" />
+              <span className="preview-count">{trackCount} tracks</span>
+            </div>
           </div>
         </label>
       </div>
