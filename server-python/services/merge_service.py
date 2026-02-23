@@ -3,10 +3,9 @@ import asyncio
 from typing import List, Callable, Optional, Dict, Set, Any
 from anyio import to_thread
 
-logger = logging.getLogger(__name__)
+from config import TRACK_LIMIT, MAX_DUPLICATES_RETURNED
 
-MAX_DUPLICATES_RETURNED = 200
-TRACK_LIMIT = 10000
+logger = logging.getLogger(__name__)
 
 class MergeService:
     async def merge_playlists(
@@ -47,12 +46,25 @@ class MergeService:
             )
             
             try:
-                playlist_info = await to_thread.run_sync(
-                    tidal_service.get_playlist_by_id, playlist_id
-                )
-                playlist_names[playlist_id] = playlist_info.get('name', f'Playlist {i + 1}')
+                if playlist_id == 'my-favorites':
+                    playlist_names[playlist_id] = 'My Favorite Tracks'
+                elif playlist_id.startswith('album_'):
+                    album_info = await to_thread.run_sync(
+                        tidal_service.get_album_by_id, playlist_id.replace('album_', '')
+                    )
+                    playlist_names[playlist_id] = album_info.get('name', f'Album {i + 1}')
+                elif playlist_id.startswith('mix_'):
+                    mix_info = await to_thread.run_sync(
+                        tidal_service.get_mix_by_id, playlist_id.replace('mix_', '')
+                    )
+                    playlist_names[playlist_id] = mix_info.get('name', f'Mix {i + 1}')
+                else:
+                    playlist_info = await to_thread.run_sync(
+                        tidal_service.get_playlist_by_id, playlist_id
+                    )
+                    playlist_names[playlist_id] = playlist_info.get('name', f'Playlist {i + 1}')
             except Exception:
-                playlist_names[playlist_id] = f'Playlist {i + 1}'
+                playlist_names[playlist_id] = f'Resource {i + 1}'
             
             tracks = await to_thread.run_sync(
                 tidal_service.get_playlist_tracks, playlist_id

@@ -15,6 +15,7 @@ from services import merge_service
 from services import tidal_service
 from dependencies import require_auth
 from utils.url_parser import extract_playlist_id
+from config import TRACK_LIMIT, MAX_PLAYLISTS
 
 router = APIRouter(tags=["api"])
 
@@ -26,6 +27,24 @@ class MergeRequest(BaseModel):
     name: str
     keepItTidy: bool = False
 
+class ConfigResponse(BaseModel):
+    trackLimit: int
+    maxPlaylists: int
+
+@router.get("/config", response_model=ConfigResponse)
+async def get_config():
+    return ConfigResponse(trackLimit=TRACK_LIMIT, maxPlaylists=MAX_PLAYLISTS)
+
+@router.get("/me/playlists")
+async def get_my_playlists(_: bool = Depends(require_auth)):
+    try:
+        playlists = await to_thread.run_sync(
+            tidal_service.get_user_playlists
+        )
+        return {"playlists": playlists}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/playlist/resolve")
 async def resolve_playlist(request: ResolveRequest, _: bool = Depends(require_auth)):
     parsed = extract_playlist_id(request.url)
@@ -33,9 +52,18 @@ async def resolve_playlist(request: ResolveRequest, _: bool = Depends(require_au
         raise HTTPException(status_code=400, detail=parsed['error'])
     
     try:
-        playlist = await to_thread.run_sync(
-            tidal_service.get_playlist_by_id, parsed['id']
-        )
+        if parsed['type'] == 'album':
+            playlist = await to_thread.run_sync(
+                tidal_service.get_album_by_id, parsed['id']
+            )
+        elif parsed['type'] == 'mix':
+            playlist = await to_thread.run_sync(
+                tidal_service.get_mix_by_id, parsed['id']
+            )
+        else:
+            playlist = await to_thread.run_sync(
+                tidal_service.get_playlist_by_id, parsed['id']
+            )
         return playlist
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

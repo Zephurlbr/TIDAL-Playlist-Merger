@@ -3,7 +3,7 @@ import { useState } from 'react';
 interface PlaylistPreviewProps {
   id: string;
   name: string;
-  trackCount: number;
+  trackCount: number | null;
   coverUrl: string | null;
   fallbackCovers: string[];
   selected: boolean;
@@ -48,7 +48,7 @@ function PlaylistPreview({
           <input type="checkbox" checked={selected} onChange={onToggle} />
           <div className="info-text">
             <span className="preview-name">{name}</span>
-            <span className="preview-count">{trackCount} tracks</span>
+            <span className="preview-count">{trackCount !== null ? `${trackCount} tracks` : ''}</span>
           </div>
         </label>
       </div>
