@@ -78,6 +78,13 @@ https://open.tidal.com/playlist/<uuid>
 - **Frontend:** React, TypeScript, Vite
 - **Auth:** TIDAL device linking flow
 
+## Notes
+
+- Max **200 playlists** per merge
+- Max **10,000 tracks per playlist** (TIDAL limit)
+- **Duplicates** are automatically removed
+- Session tokens are stored locally in `server-python/tidal_session.json`
+
 ## Project Structure
 
 ```
@@ -132,12 +139,6 @@ VITE_API_BASE=http://localhost:8000
 | Playlist not found | Check playlist ID is correct |
 | Login doesn't complete | Refresh page after authorizing |
 
-## Notes
-
-- Max **200 playlists** per merge
-- Max **10,000 tracks per playlist** (TIDAL limit)
-- **Duplicates** are automatically removed
-- Session tokens are stored locally in `server-python/tidal_session.json`
 
 ## License
 
