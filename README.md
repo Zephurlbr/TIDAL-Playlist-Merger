@@ -75,7 +75,7 @@ https://open.tidal.com/playlist/<uuid>
 ## Tech Stack
 
 - **Backend:** [Python](https://www.python.org/), [FastAPI](https://github.com/FastAPI/FastAPI), [uvicorn](https://github.com/Kludex/uvicorn), [tidalapi](https://github.com/EbbLabs/python-tidal)
-- **Frontend:** React, TypeScript, Vite
+- **Frontend:** [React](https://github.com/facebook/react), [TypeScript](https://github.com/microsoft/TypeScript?tab=readme-ov-file), [Vite](https://github.com/vitejs/vite)
 - **Auth:** TIDAL device linking flow
 
 ## Notes
