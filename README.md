@@ -31,12 +31,17 @@ Merge multiple TIDAL playlists into one with duplicate track removal. No API key
 
 ```bash
 git clone https://github.com/Zephurlbr/TIDAL-Playlist-Merger.git
+```
+```bashbash
 cd TIDAL-Playlist-Merger
+```
 
 # Windows
+```bash
 start.bat
-
+```
 # macOS/Linux
+```bash
 chmod +x start.sh && ./start.sh
 ```
 
