@@ -27,7 +27,7 @@ Merge multiple TIDAL playlists into one with duplicate track removal. No API key
 
 ## Quick Start
 
-**Prerequisites:** Python 3.9+, Node.js 18+, TIDAL account
+**Prerequisites:** [Python 3.9+](https://www.python.org/downloads/), [Node.js 18+](https://nodejs.org/en/download), TIDAL account
 
 ```bash
 git clone https://github.com/Zephurlbr/TIDAL-Playlist-Merger.git
@@ -74,7 +74,7 @@ https://open.tidal.com/playlist/<uuid>
 
 ## Tech Stack
 
-- **Backend:** Python, FastAPI, uvicorn, [tidalapi](https://github.com/EbbLabs/python-tidal)
+- **Backend:** [Python](https://www.python.org/), [FastAPI](https://github.com/FastAPI/FastAPI), [uvicorn](https://github.com/Kludex/uvicorn), [tidalapi](https://github.com/EbbLabs/python-tidal)
 - **Frontend:** React, TypeScript, Vite
 - **Auth:** TIDAL device linking flow
 
