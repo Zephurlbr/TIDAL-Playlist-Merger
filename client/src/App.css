@@ -819,3 +819,70 @@ input[type="checkbox"]:hover {
   border-color: rgba(255, 220, 0, 0.3);
   transform: translateX(5px);
 }
+
+/* GitHub Footer */
+.github-footer {
+  margin-top: 6rem;
+  padding: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.6;
+}
+
+.github-link:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  transform: scale(1.1);
+}
+
+.github-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--tidal-white);
+}
+
+/* View All Playlists Button */
+.view-all-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.view-all-playlists-btn {
+  padding: 10px 20px;
+  background: rgba(255, 220, 0, 0.15);
+  color: var(--tidal-yellow);
+  border: 1px solid var(--tidal-yellow);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-all-playlists-btn:hover {
+  background: var(--tidal-yellow);
+  color: var(--tidal-black);
+  transform: scale(1.05);
+}
+
+/* Playlists list in modal */
+.playlists-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}

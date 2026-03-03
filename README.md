@@ -124,12 +124,11 @@ VITE_API_BASE=http://localhost:8000
 |-------|----------|
 | Port 8000 in use | Kill process or change `PORT` in `.env` |
 | CORS error | Access at `http://localhost:8000` (not 5173) |
-| Playlist not found | Ensure playlist is **public** |
+| Playlist not found | Check playlist ID is correct |
 | Login doesn't complete | Refresh page after authorizing |
 
 ## Notes
 
-- Playlists must be **public**
 - Max **200 playlists** per merge
 - Max **10,000 tracks per playlist** (TIDAL limit)
 - **Duplicates** are automatically removed
