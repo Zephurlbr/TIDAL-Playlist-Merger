@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { validatePlaylistUrl } from '../utils/urlValidator';
 
 interface AddPlaylistInputProps {
@@ -32,29 +33,45 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
       await onAdd(url);
       setUrl('');
     } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      setError(axiosError.response?.data?.message || 'Failed to add playlist');
+      const message = err instanceof Error ? err.message : 'Failed to add playlist';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="add-playlist-form">
-      <div className="input-row">
+    <form onSubmit={handleSubmit} className="w-full space-y-3">
+      <div className="flex gap-3">
         <input
           type="text"
           placeholder="Paste TIDAL playlist link or ID..."
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={disabled || loading}
-          className={error ? 'input-error' : ''}
+          className={`flex-1 bg-white/5 border rounded-xl py-3 px-4 outline-none transition-all duration-300
+            ${error ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10'}`}
         />
-        <button type="submit" disabled={disabled || loading || maxReached}>
-          {loading ? 'Adding...' : 'Add'}
+        <button 
+          type="submit" 
+          disabled={disabled || loading || maxReached}
+          className="btn-primary flex items-center justify-center gap-2 px-6"
+        >
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-tidal-black border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <Plus size={18} />
+              <span>Add</span>
+            </>
+          )}
         </button>
       </div>
-      {error && <span className="inline-error">{error}</span>}
+      {error && (
+        <p className="text-sm text-red-500 font-medium animate-slide-down pl-1">
+          {error}
+        </p>
+      )}
     </form>
   );
 }

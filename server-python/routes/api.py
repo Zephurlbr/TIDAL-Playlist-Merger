@@ -1,18 +1,13 @@
 import json
 import asyncio
-import sys
-import os
 from typing import List
 from anyio import to_thread
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from services import merge_service
-from services import tidal_service
+from services import merge_service, tidal_service
 from dependencies import require_auth
 from utils.url_parser import extract_playlist_id
 
@@ -24,7 +19,29 @@ class ResolveRequest(BaseModel):
 class MergeRequest(BaseModel):
     playlistIds: List[str]
     name: str
-    keepItTidy: bool = False
+    dedupeMode: str = "off"
+
+VALID_DEDUPE_MODES = ["off", "inter", "intra", "full"]
+
+@router.get("/me/playlists")
+async def get_my_playlists(_: bool = Depends(require_auth)):
+    try:
+        playlists = await to_thread.run_sync(
+            tidal_service.get_user_playlists
+        )
+        return {"playlists": playlists}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/me/favorites/count")
+async def get_favorites_count(_: bool = Depends(require_auth)):
+    try:
+        result = await to_thread.run_sync(
+            tidal_service.get_favorites_count
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/playlist/resolve")
 async def resolve_playlist(request: ResolveRequest, _: bool = Depends(require_auth)):
@@ -33,9 +50,20 @@ async def resolve_playlist(request: ResolveRequest, _: bool = Depends(require_au
         raise HTTPException(status_code=400, detail=parsed['error'])
     
     try:
-        playlist = await to_thread.run_sync(
-            tidal_service.get_playlist_by_id, parsed['id']
-        )
+        content_type = parsed.get('type', 'playlist')
+        
+        if content_type == 'album':
+            playlist = await to_thread.run_sync(
+                tidal_service.get_album_by_id, parsed['id']
+            )
+        elif content_type == 'mix':
+            playlist = await to_thread.run_sync(
+                tidal_service.get_mix_by_id, parsed['id']
+            )
+        else:
+            playlist = await to_thread.run_sync(
+                tidal_service.get_playlist_by_id, parsed['id']
+            )
         return playlist
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -51,6 +79,9 @@ async def merge_playlists(request: MergeRequest, _: bool = Depends(require_auth)
     if len(request.playlistIds) < 2:
         raise HTTPException(status_code=400, detail="At least 2 playlists required")
     
+    if request.dedupeMode not in VALID_DEDUPE_MODES:
+        raise HTTPException(status_code=400, detail=f"Invalid dedupeMode. Must be one of: {VALID_DEDUPE_MODES}")
+    
     queue: asyncio.Queue = asyncio.Queue()
     merge_complete = asyncio.Event()
     
@@ -63,7 +94,7 @@ async def merge_playlists(request: MergeRequest, _: bool = Depends(require_auth)
                 request.playlistIds,
                 request.name,
                 progress_callback,
-                request.keepItTidy
+                request.dedupeMode
             )
             await queue.put({'complete': True, 'result': result})
         except Exception as e:

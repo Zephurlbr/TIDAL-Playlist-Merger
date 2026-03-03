@@ -61,7 +61,7 @@ if not exist "venv" (
     %PYTHON_CMD% -m venv venv
 )
 call venv\Scripts\activate
-pip install -r requirements.txt -q
+venv\Scripts\python.exe -m pip install -r requirements.txt -q
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install Python dependencies.
     pause
@@ -101,6 +101,17 @@ echo ========================================
 echo.
 
 cd ..\server-python
+if not exist "venv\Scripts\activate.bat" (
+    echo [ERROR] Virtual environment not found. Please run this script again.
+    pause
+    exit /b 1
+)
 call venv\Scripts\activate
 start http://localhost:8000
-%PYTHON_CMD% -m uvicorn main:app --host 0.0.0.0 --port 8000
+venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 8000
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Server crashed with exit code %errorlevel%.
+    echo Traceback/Error should be visible above.
+    pause
+)

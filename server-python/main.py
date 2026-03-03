@@ -1,5 +1,6 @@
 import os
 import logging
+from typing import List
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,10 +20,20 @@ from routes import auth_router, api_router
 app = FastAPI(title="Tidal Playlist Merger API")
 
 client_url = os.getenv('CLIENT_URL', 'http://localhost:5173')
+allowed_origins_raw = os.getenv('ALLOWED_ORIGINS', '')
+allowed_origins = [client_url, "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8000", "http://127.0.0.1:8000"]
+
+if allowed_origins_raw:
+    # Add origins from CSV env var
+    extra_origins = [o.strip() for o in allowed_origins_raw.split(',') if o.strip()]
+    allowed_origins.extend(extra_origins)
+
+# Remove duplicates
+allowed_origins = list(set(allowed_origins))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[client_url, "http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8000", "http://127.0.0.1:8000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

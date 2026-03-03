@@ -14,11 +14,11 @@ class MergeService:
         playlist_ids: List[str],
         new_playlist_name: str,
         on_progress: Optional[Callable[[dict], Any]] = None,
-        keep_it_tidy: bool = False
+        dedupe_mode: str = "off"
     ) -> dict:
         from . import tidal_service
         
-        logger.info(f"Merging playlists: {playlist_ids} into {new_playlist_name} (keep_it_tidy={keep_it_tidy})")
+        logger.info(f"Merging playlists: {playlist_ids} into {new_playlist_name} (dedupe_mode={dedupe_mode})")
         
         async def send_progress(message: str, progress: float = 0):
             if on_progress:
@@ -70,31 +70,53 @@ class MergeService:
                     total_fetched += 1
                     
                     is_intra_duplicate = track_id in tracks_in_this_playlist
-                    is_cross_duplicate = track_id in seen_track_ids and not is_intra_duplicate
+                    is_cross_duplicate = track_id in seen_track_ids
                     
                     tracks_in_this_playlist.add(track_id)
+                    
+                    should_add_track = True
+                    
+                    if dedupe_mode == 'off':
+                        should_add_track = True
+                    
+                    elif dedupe_mode == 'inter':
+                        if is_cross_duplicate:
+                            should_add_track = False
+                    
+                    elif dedupe_mode == 'intra':
+                        if is_intra_duplicate:
+                            should_add_track = False
+                    
+                    elif dedupe_mode == 'full':
+                        if is_cross_duplicate or is_intra_duplicate:
+                            should_add_track = False
                     
                     if is_intra_duplicate:
                         intra_playlist_duplicates += 1
                         intra_duplicate_counts[track_id] = intra_duplicate_counts.get(track_id, 0) + 1
-                        if not keep_it_tidy:
-                            all_tracks.append(track_id)
                     
-                    elif is_cross_duplicate:
+                    if is_cross_duplicate:
                         cross_playlist_duplicates += 1
                         if track_id in first_occurrence:
                             current_playlist = playlist_names[playlist_id]
                             if current_playlist not in first_occurrence[track_id]['playlists']:
                                 first_occurrence[track_id]['playlists'].append(current_playlist)
                     
-                    else:
-                        seen_track_ids.add(track_id)
-                        all_tracks.append(track_id)
-                        first_occurrence[track_id] = {
-                            'name': track_name,
-                            'artist': track_artist,
-                            'playlists': [playlist_names[playlist_id]]
-                        }
+                    if should_add_track:
+                        if track_id not in seen_track_ids:
+                            seen_track_ids.add(track_id)
+                            if len(all_tracks) < TRACK_LIMIT:
+                                all_tracks.append(track_id)
+                            first_occurrence[track_id] = {
+                                'name': track_name,
+                                'artist': track_artist,
+                                'playlists': [playlist_names[playlist_id]]
+                            }
+                        else:
+                            if track_id in first_occurrence:
+                                current_playlist = playlist_names[playlist_id]
+                                if current_playlist not in first_occurrence[track_id]['playlists']:
+                                    first_occurrence[track_id]['playlists'].append(current_playlist)
         
         duplicate_details: List[dict] = []
         
@@ -107,7 +129,7 @@ class MergeService:
                     'type': 'cross'
                 })
         
-        if keep_it_tidy:
+        if dedupe_mode in ('intra', 'full'):
             for track_id, count in intra_duplicate_counts.items():
                 if track_id in first_occurrence:
                     info = first_occurrence[track_id]
@@ -121,10 +143,12 @@ class MergeService:
         duplicate_details.sort(key=lambda x: x['name'].lower())
         duplicates_returned = duplicate_details[:MAX_DUPLICATES_RETURNED]
         
-        if keep_it_tidy:
+        if dedupe_mode in ('intra', 'full'):
             total_duplicates = cross_playlist_duplicates + intra_playlist_duplicates
-        else:
+        elif dedupe_mode == 'inter':
             total_duplicates = cross_playlist_duplicates
+        else:
+            total_duplicates = 0
         
         logger.info(f"Total fetched: {total_fetched}, Unique: {len(all_tracks)}, "
                    f"Cross-playlist dupes: {cross_playlist_duplicates}, Intra-playlist dupes: {intra_playlist_duplicates}")
@@ -139,7 +163,9 @@ class MergeService:
             logger.info(f"Truncated tracks from {len(all_tracks) + truncated_count} to {TRACK_LIMIT}")
         
         if total_duplicates > 0:
-            if intra_playlist_duplicates > 0 and keep_it_tidy:
+            if dedupe_mode == 'off':
+                await send_progress(f"Found {len(all_tracks)} tracks (duplicates kept)", 50)
+            elif intra_playlist_duplicates > 0 and dedupe_mode in ('intra', 'full'):
                 await send_progress(
                     f"Found {len(all_tracks)} unique tracks ({total_duplicates} duplicates removed, "
                     f"including {intra_playlist_duplicates} within playlists)",
@@ -148,7 +174,10 @@ class MergeService:
             else:
                 await send_progress(f"Found {len(all_tracks)} unique tracks ({total_duplicates} duplicates removed)", 50)
         else:
-            await send_progress(f"Found {len(all_tracks)} unique tracks", 50)
+            if dedupe_mode == 'off':
+                await send_progress(f"Found {len(all_tracks)} tracks", 50)
+            else:
+                await send_progress(f"Found {len(all_tracks)} unique tracks", 50)
         
         await send_progress("Creating new playlist...", 60)
         new_playlist = await to_thread.run_sync(
