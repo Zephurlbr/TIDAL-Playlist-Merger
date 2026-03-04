@@ -39,10 +39,14 @@ export function useAuth() {
       } catch (error) {
         if (!isMounted) return;
         console.error('Auth check failed', error);
-        if (authState !== 'polling') {
-          setAuthError('Unable to connect to server. Please ensure the backend is running.');
-          setAuthState('error');
+        
+        setAuthError('Unable to connect to server. Please check your connection and try again.');
+        
+        if (intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
         }
+        setAuthState('error');
       }
     };
 

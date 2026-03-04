@@ -69,26 +69,22 @@ if %errorlevel% neq 0 (
 )
 echo        Python dependencies installed.
 
-:: Build frontend if needed
-echo [4/4] Checking frontend...
+:: Build frontend
+echo [4/4] Building frontend...
 cd ..\client
-if not exist "dist" (
-    echo        Installing frontend dependencies...
-    call npm install --silent
-    if !errorlevel! neq 0 (
-        echo [ERROR] Failed to install npm dependencies.
-        pause
-        exit /b 1
-    )
-    echo        Building frontend...
-    call npm run build
-    if !errorlevel! neq 0 (
-        echo [ERROR] Failed to build frontend.
-        pause
-        exit /b 1
-    )
-) else (
-    echo        Frontend already built.
+echo        Installing frontend dependencies...
+call npm install --silent
+if !errorlevel! neq 0 (
+    echo [ERROR] Failed to install npm dependencies.
+    pause
+    exit /b 1
+)
+echo        Building frontend...
+call npm run build
+if !errorlevel! neq 0 (
+    echo [ERROR] Failed to build frontend.
+    pause
+    exit /b 1
 )
 
 :: Start server

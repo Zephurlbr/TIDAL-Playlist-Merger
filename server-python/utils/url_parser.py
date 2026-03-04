@@ -5,6 +5,7 @@ PLAYLIST_PATTERNS = [
     re.compile(r'listen\.tidal\.com/playlist/([a-zA-Z0-9-]+)', re.I),
     re.compile(r'tidal\.com/.*playlist/([a-zA-Z0-9-]+)', re.I),
     re.compile(r'tidal\.com/playlist/([a-zA-Z0-9-]+)', re.I),
+    re.compile(r'open\.tidal\.com/playlist/([a-zA-Z0-9-]+)', re.I),
     re.compile(r'^([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$', re.I),
     re.compile(r'^([a-zA-Z0-9-]{20,})$')
 ]

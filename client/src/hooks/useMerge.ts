@@ -23,25 +23,30 @@ export interface MergeResult {
 }
 
 export type DedupeMode = 'off' | 'inter' | 'intra' | 'full';
+export type StatusType = 'idle' | 'info' | 'success' | 'error';
 
 export function useMerge() {
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState('');
+    const [statusType, setStatusType] = useState<StatusType>('idle');
     const [mergeSuccess, setMergeSuccess] = useState(false);
     const [mergeResult, setMergeResult] = useState<MergeResult | null>(null);
 
     const merge = async (playlistIds: string[], newName: string, dedupeMode: DedupeMode) => {
         if (playlistIds.length < 2) {
             setStatus('Please select at least 2 playlists to merge.');
+            setStatusType('error');
             return;
         }
         if (!newName.trim()) {
             setStatus('Please enter a name for your new merged playlist.');
+            setStatusType('error');
             return;
         }
 
         setLoading(true);
         setStatus('Starting merge process...');
+        setStatusType('info');
         setMergeResult(null);
         setMergeSuccess(false);
 
@@ -88,6 +93,7 @@ export function useMerge() {
 
                             if (data.error) {
                                 setStatus(`Error: ${data.error}`);
+                                setStatusType('error');
                                 setLoading(false);
                                 return;
                             }
@@ -115,6 +121,7 @@ export function useMerge() {
                                     message += ` Note: Tidal limits playlists to ${TRACK_LIMIT.toLocaleString()} tracks - ${result.truncatedCount.toLocaleString()} additional tracks were not added.`;
                                 }
                                 setStatus(message);
+                                setStatusType('success');
                                 setLoading(false);
                                 setMergeSuccess(true);
                                 return;
@@ -122,8 +129,10 @@ export function useMerge() {
 
                             if (data.progress !== undefined) {
                                 setStatus(`${data.message} (${Math.round(data.progress)}%)`);
+                                setStatusType('info');
                             } else if (data.message) {
                                 setStatus(data.message);
+                                setStatusType('info');
                             }
                         } catch (e) {
                             console.error('Failed to parse SSE data:', e);
@@ -134,6 +143,7 @@ export function useMerge() {
         } catch (error: any) {
             const message = error instanceof Error ? error.message : 'Unknown error';
             setStatus(`Merge failed: ${message}`);
+            setStatusType('error');
             setLoading(false);
         }
     };
@@ -147,6 +157,7 @@ export function useMerge() {
     return {
         loading,
         status,
+        statusType,
         setStatus,
         mergeSuccess,
         mergeResult,

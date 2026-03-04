@@ -1,5 +1,5 @@
-import { useState, memo, useCallback, useMemo } from 'react';
-import { X, Search, RefreshCw, Music, CheckCircle2, Plus } from 'lucide-react';
+import { useState, memo, useCallback, useMemo, useEffect, useRef } from 'react';
+import { X, Search, RefreshCw, CheckCircle2, Plus, Library } from 'lucide-react';
 import type { Playlist } from '../types';
 
 interface MyPlaylistsModalProps {
@@ -37,7 +37,7 @@ const PlaylistItem = memo(function PlaylistItem({
             </div>
           ) : (
             <div className="w-full h-full bg-white/5 flex items-center justify-center text-text-muted">
-              <Music size={18} />
+              <Library size={18} />
             </div>
           )}
         </div>
@@ -45,7 +45,11 @@ const PlaylistItem = memo(function PlaylistItem({
           <div className="font-bold text-white truncate">{playlist.name}</div>
           <div className="flex items-center gap-2 mt-0.5">
             {playlist.type && (
-              <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/10 text-white/50">
+              <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${playlist.type === 'mix' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                playlist.type === 'album' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                  playlist.type === 'favorites' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                    'bg-tidal-yellow/10 text-tidal-yellow border-tidal-yellow/20'
+                }`}>
                 {playlist.type}
               </span>
             )}
@@ -90,6 +94,38 @@ export default function MyPlaylistsModal({
 }: MyPlaylistsModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [locallyAddedIds, setLocallyAddedIds] = useState<Set<string>>(new Set());
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  };
+
+  useEffect(() => {
+    if (!show) return;
+
+    previousFocusRef.current = document.activeElement as HTMLElement;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+
+    document.addEventListener('keydown', handleEscape);
+
+    setTimeout(() => {
+      const closeBtn = document.getElementById('myplaylists-modal-close');
+      closeBtn?.focus();
+    }, 0);
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      previousFocusRef.current?.focus();
+    };
+  }, [show]);
 
   const addedIds = useMemo(() => {
     const propIds = new Set(playlists.map(p => p.id));
@@ -112,21 +148,29 @@ export default function MyPlaylistsModal({
     [myPlaylists, searchQuery]
   );
 
-  if (!show) return null;
+  if (!show && !isClosing) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-black/40 animate-fade-in" onClick={onClose}>
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-black/40 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
+      onClick={handleClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="myplaylists-modal-title"
+    >
       <div
-        className="w-full max-w-2xl bg-tidal-gray border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] animate-slide-up"
+        className={`w-full max-w-2xl bg-tidal-gray border border-white/10 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] ${isClosing ? 'animate-slide-down-out' : 'animate-slide-up'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-6 border-b border-white/5">
-          <h3 className="text-xl font-black tracking-tight text-white flex items-center gap-3">
-            <Music className="text-tidal-yellow" size={24} />
+          <h3 id="myplaylists-modal-title" className="text-xl font-black tracking-tight text-white flex items-center gap-3">
+            <Library className="text-tidal-yellow" size={24} />
             My Playlists
           </h3>
           <button
-            onClick={onClose}
+            id="myplaylists-modal-close"
+            onClick={handleClose}
+            aria-label="Close modal"
             className="p-2 -m-2 text-text-muted hover:text-white transition-colors"
           >
             <X size={24} />
@@ -147,6 +191,7 @@ export default function MyPlaylistsModal({
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
                   className="p-1 hover:bg-white/10 rounded-full text-text-muted hover:text-white transition-all"
                 >
                   <X size={16} />
@@ -155,9 +200,9 @@ export default function MyPlaylistsModal({
               <button
                 onClick={() => onRefresh(true)}
                 disabled={myPlaylistsLoading}
+                aria-label="Refresh library"
                 className={`p-2 hover:bg-white/10 rounded-lg text-text-muted hover:text-tidal-yellow transition-all
                   ${myPlaylistsLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer animate-none'}`}
-                title="Refresh library"
               >
                 <RefreshCw size={18} className={myPlaylistsLoading ? 'animate-spin' : ''} />
               </button>
@@ -195,7 +240,7 @@ export default function MyPlaylistsModal({
 
         <div className="p-6 border-t border-white/5 bg-white/2">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-full btn-primary"
           >
             Done

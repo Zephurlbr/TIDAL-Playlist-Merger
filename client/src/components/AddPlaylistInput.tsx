@@ -33,7 +33,19 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
       await onAdd(url);
       setUrl('');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to add playlist';
+      const axiosError = err as { response?: { data?: { detail?: string | string[] } } };
+      const detail = axiosError.response?.data?.detail;
+
+      let message: string;
+      if (typeof detail === 'string') {
+        message = detail;
+      } else if (Array.isArray(detail)) {
+        message = detail.map(d => (d as { msg?: string }).msg || String(d)).join(', ');
+      } else if (err instanceof Error) {
+        message = err.message;
+      } else {
+        message = 'Failed to add playlist';
+      }
       setError(message);
     } finally {
       setLoading(false);
@@ -49,11 +61,11 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={disabled || loading}
-          className={`flex-1 bg-white/5 border rounded-xl py-3 px-4 outline-none transition-all duration-300
+          className={`flex-1 bg-white/5 border rounded-xl py-2.5 px-4 outline-none transition-all duration-300
             ${error ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10'}`}
         />
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={disabled || loading || maxReached}
           className="btn-primary flex items-center justify-center gap-2 px-6"
         >

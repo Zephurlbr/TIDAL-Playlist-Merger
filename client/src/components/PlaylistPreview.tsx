@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2, Music } from 'lucide-react';
+import { GripVertical, Trash2, Music, Check } from 'lucide-react';
 
 interface PlaylistPreviewProps {
   id: string;
@@ -87,18 +87,29 @@ const PlaylistPreview = memo(function PlaylistPreview({
       </div>
 
       <div className="flex-1 min-w-0">
-        <label className="flex items-center gap-3 cursor-pointer select-none" onClick={(e) => e.stopPropagation()}>
+        <label className="flex items-center gap-3 cursor-pointer group/checkbox select-none" onClick={(e) => e.stopPropagation()}>
           <input
             type="checkbox"
             checked={selected}
             onChange={onToggle}
-            className="w-5 h-5 accent-tidal-yellow cursor-pointer transition-transform hover:scale-110"
+            className="sr-only"
           />
+          <div className={`w-5 h-5 rounded flex items-center justify-center transition-all duration-200 border-2 shrink-0
+            ${selected
+              ? 'bg-tidal-yellow border-tidal-yellow shadow-[0_0_10px_rgba(255,220,0,0.3)]'
+              : 'border-white/20 bg-transparent group-hover/checkbox:border-white/40'}`}
+          >
+            {selected && <Check size={14} className="text-black stroke-[4]" />}
+          </div>
           <div className="min-w-0">
             <span className="block font-bold text-lg truncate">{name}</span>
             <div className="flex items-center gap-2 mt-1">
               {type && (
-                <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-white/10 text-white/70">
+                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${type === 'mix' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
+                  type === 'album' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                    type === 'favorites' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                      'bg-tidal-yellow/10 text-tidal-yellow border-tidal-yellow/20'
+                  }`}>
                   {type}
                 </span>
               )}
@@ -113,7 +124,7 @@ const PlaylistPreview = memo(function PlaylistPreview({
       </div>
 
       <div
-        className="p-2 -m-2 cursor-grab active:cursor-grabbing text-text-muted hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+        className="p-2 -m-2 cursor-grab active:cursor-grabbing text-text-muted hover:text-white transition-colors"
         {...attributes}
         {...listeners}
       >
@@ -125,7 +136,7 @@ const PlaylistPreview = memo(function PlaylistPreview({
           e.stopPropagation();
           onRemove();
         }}
-        className="p-2 -m-2 text-text-muted hover:text-red-500 hover:scale-125 transition-all opacity-0 group-hover:opacity-100"
+        className="p-2 -m-2 text-text-muted hover:text-red-500 hover:scale-125 transition-all"
       >
         <Trash2 size={18} />
       </button>
