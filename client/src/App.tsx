@@ -27,9 +27,9 @@ import {
   Loader2,
   Info,
   X,
-  Type,
   Layers,
-  Merge
+  Merge,
+  FolderPen
 } from 'lucide-react';
 import AddPlaylistInput from './components/AddPlaylistInput';
 import PlaylistPreview from './components/PlaylistPreview';
@@ -258,7 +258,7 @@ function App() {
       <div className="min-h-screen flex items-center justify-center py-12">
         <div className="w-full max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center animate-fade-in">
           <div className="glass-panel text-center">
-            <h1 className="text-7xl font-black tracking-tight mb-4 bg-linear-to-r from-white to-tidal-yellow bg-clip-text text-transparent">
+            <h1 className="text-7xl font-black tracking-tight mb-4 pb-2 bg-linear-to-r from-white to-tidal-yellow bg-clip-text text-transparent">
               TIDAL Playlist Merger
             </h1>
             <p className="text-2xl text-text-muted mb-12 font-medium">Consolidate your music library seamlessly.</p>
@@ -354,7 +354,7 @@ function App() {
 
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
           <div>
-            <h1 className="text-6xl font-black tracking-tight mb-2 bg-linear-to-r from-white to-tidal-yellow bg-clip-text text-transparent">
+            <h1 className="text-6xl font-black tracking-tight mb-2 pb-2 bg-linear-to-r from-white to-tidal-yellow bg-clip-text text-transparent">
               TIDAL Playlist Merger
             </h1>
             <p className="text-xl text-text-muted font-medium">Consolidate your music library.</p>
@@ -430,10 +430,10 @@ function App() {
                 <Search className="absolute left-4 text-text-muted group-focus-within:text-tidal-yellow transition-colors" size={18} />
                 <input
                   type="text"
-                  placeholder="Search playlists..."
+                  placeholder="Search your playlists..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10 focus:ring-4 focus:ring-tidal-yellow/10 rounded-xl py-3 pl-12 pr-12 transition-all outline-none text-lg"
+                  className="w-full bg-white/5 border border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10 focus:shadow-[0_0_20px_rgba(255,220,0,0.15)] rounded-xl py-2.5 px-4 pl-12 pr-12 transition-all duration-300 outline-none text-lg"
                 />
                 {searchQuery && (
                   <button
@@ -513,28 +513,25 @@ function App() {
         <section className="glass-panel p-6 sm:p-8 space-y-8">
           <div className="space-y-2">
             <div className="flex items-center gap-2 px-1">
-              <Type size={16} className="text-tidal-yellow" />
-              <label className="text-xs font-bold text-tidal-yellow uppercase tracking-[0.2em] opacity-80">New Playlist Name</label>
+              <FolderPen size={22} className="text-tidal-yellow" />
+              <label className="text-sm font-bold text-tidal-yellow uppercase tracking-[0.15em] opacity-80">New Playlist Name</label>
             </div>
             <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-tidal-yellow transition-colors">
-                <Music size={20} />
-              </div>
               <input
                 type="text"
                 placeholder="e.g. My Ultimate Summer Mix"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
                 disabled={loading}
-                className="w-full bg-white/5 border border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10 rounded-xl py-2.5 px-4 pl-12 transition-all outline-none text-xl backdrop-blur-md focus:ring-4 focus:ring-tidal-yellow/10 focus:scale-[1.01]"
+                className="w-full bg-white/5 border border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10 focus:shadow-[0_0_20px_rgba(255,220,0,0.15)] rounded-xl py-2.5 px-4 transition-all duration-300 outline-none text-lg"
               />
             </div>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-center gap-2">
-              <Layers size={16} className="text-tidal-yellow" />
-              <label className="text-xs font-bold text-tidal-yellow uppercase tracking-[0.2em] opacity-80">Duplicate removal mode</label>
+              <Layers size={22} className="text-tidal-yellow" />
+              <label className="text-sm font-bold text-tidal-yellow uppercase tracking-[0.15em] opacity-80">Duplicate removal mode</label>
             </div>
 
             <div className="relative flex max-w-md mx-auto bg-white/2 border border-white/5 rounded-2xl p-1 shadow-2xl backdrop-blur-md">
@@ -597,7 +594,7 @@ function App() {
                 </>
               ) : (
                 <>
-                  Merge {selectedIds.size} Playlists
+                  <span className="uppercase tracking-[0.15em] font-bold">Merge {selectedIds.size} Playlists</span>
                   <Merge size={20} className="rotate-90 transition-transform group-hover:translate-x-1.5" />
                 </>
               )}
@@ -610,7 +607,7 @@ function App() {
             href="https://github.com/Zephurlbr"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-text-muted hover:text-white transition-colors p-3 hover:bg-white/5 rounded-full"
+            className="text-text-muted hover:text-white transition-all duration-300 p-3 hover:bg-white/10 rounded-full hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]"
             aria-label="View on GitHub"
           >
             <svg viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor">

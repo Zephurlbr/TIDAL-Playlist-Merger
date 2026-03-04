@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { validatePlaylistUrl } from '../utils/urlValidator';
 
 interface AddPlaylistInputProps {
@@ -53,16 +53,20 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-3">
+    <form onSubmit={handleSubmit} className="w-full space-y-2">
+      <div className="flex items-center gap-2 px-1">
+        <Search size={22} className="text-tidal-yellow" />
+        <label className="text-sm font-bold text-tidal-yellow uppercase tracking-[0.15em] opacity-80">Add by link or ID</label>
+      </div>
       <div className="flex gap-3">
         <input
           type="text"
-          placeholder="Paste TIDAL playlist link or ID..."
+          placeholder="https://tidal.com/browse/playlist/..."
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={disabled || loading}
-          className={`flex-1 bg-white/5 border rounded-xl py-2.5 px-4 outline-none transition-all duration-300
-            ${error ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10'}`}
+          className={`flex-1 bg-white/5 border border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10 focus:shadow-[0_0_20px_rgba(255,220,0,0.15)] rounded-xl py-2.5 px-4 outline-none transition-all duration-300 text-lg
+            ${error ? 'border-red-500/50 focus:border-red-500 focus:shadow-red-500/20' : ''}`}
         />
         <button
           type="submit"
@@ -73,7 +77,7 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
             <div className="w-5 h-5 border-2 border-tidal-black border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <Plus size={18} />
+              <Plus size={20} />
               <span>Add</span>
             </>
           )}

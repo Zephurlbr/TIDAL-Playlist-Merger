@@ -14,6 +14,7 @@ export interface MergeResult {
     duplicates: Array<{
         name: string;
         artist: string;
+        coverUrl?: string;
         appearedIn: string[] | string;
         type?: 'cross' | 'intra';
     }>;

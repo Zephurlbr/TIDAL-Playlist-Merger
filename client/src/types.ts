@@ -11,6 +11,7 @@ export interface Playlist {
 export interface DuplicateTrack {
     name: string;
     artist: string;
+    coverUrl?: string;
     appearedIn: string[] | string;
     type?: 'cross' | 'intra';
 }

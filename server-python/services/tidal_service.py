@@ -1,9 +1,24 @@
 import logging
-from typing import List
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
 class TidalService:
+    def _get_track_cover_url(self, track) -> Optional[str]:
+        """Extract 320x320 cover URL from a track object."""
+        try:
+            if hasattr(track, 'album') and track.album:
+                album = track.album
+                if hasattr(album, 'img_uuid') and album.img_uuid:
+                    return album.image(320)
+                elif hasattr(album, 'cover') and album.cover:
+                    uuid = album.cover.replace('-', '/')
+                    return f"https://resources.tidal.com/images/{uuid}/320x320.jpg"
+            return None
+        except Exception as e:
+            logger.info(f"Could not get track cover: {e}")
+            return None
+
     def _get_session(self):
         from . import auth_service
         session = auth_service.get_session_object()
@@ -87,7 +102,8 @@ class TidalService:
                 result.append({
                     'id': str(track.id),
                     'name': track.name,
-                    'artist': track.artist.name if track.artist else 'Unknown Artist'
+                    'artist': track.artist.name if track.artist else 'Unknown Artist',
+                    'coverUrl': self._get_track_cover_url(track)
                 })
             
             logger.info(f"Fetched {len(result)} tracks from mix {mix_id}")
@@ -183,7 +199,8 @@ class TidalService:
                 result.append({
                     'id': str(track.id),
                     'name': track.name,
-                    'artist': track.artist.name if track.artist else 'Unknown Artist'
+                    'artist': track.artist.name if track.artist else 'Unknown Artist',
+                    'coverUrl': self._get_track_cover_url(track)
                 })
             
             logger.info(f"Fetched {len(result)} tracks from playlist {playlist_id}")
@@ -470,7 +487,8 @@ class TidalService:
             result.append({
                 'id': str(track.id),
                 'name': track.name,
-                'artist': artist_name
+                'artist': artist_name,
+                'coverUrl': self._get_track_cover_url(track)
             })
         
         logger.info(f"Fetched {len(result)} favorite tracks")

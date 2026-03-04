@@ -65,6 +65,7 @@ class MergeService:
                 track_id = item.get('id')
                 track_name = item.get('name', 'Unknown')
                 track_artist = item.get('artist', 'Unknown Artist')
+                track_cover = item.get('coverUrl')
                 
                 if track_id:
                     total_fetched += 1
@@ -110,6 +111,7 @@ class MergeService:
                             first_occurrence[track_id] = {
                                 'name': track_name,
                                 'artist': track_artist,
+                                'coverUrl': track_cover,
                                 'playlists': [playlist_names[playlist_id]]
                             }
                         else:
@@ -125,6 +127,7 @@ class MergeService:
                 duplicate_details.append({
                     'name': info['name'],
                     'artist': info['artist'],
+                    'coverUrl': info.get('coverUrl'),
                     'appearedIn': info['playlists'],
                     'type': 'cross'
                 })
@@ -136,6 +139,7 @@ class MergeService:
                     duplicate_details.append({
                         'name': info['name'],
                         'artist': info['artist'],
+                        'coverUrl': info.get('coverUrl'),
                         'appearedIn': f"{info['playlists'][0]} ({count + 1}x)",
                         'type': 'intra'
                     })

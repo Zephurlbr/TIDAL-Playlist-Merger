@@ -182,10 +182,10 @@ export default function MyPlaylistsModal({
             <Search className="absolute left-4 text-text-muted group-focus-within:text-tidal-yellow transition-colors" size={18} />
             <input
               type="text"
-              placeholder="Search your library..."
+              placeholder="Search your playlists..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10 rounded-xl py-3 pl-12 pr-12 transition-all outline-none text-lg"
+              className="w-full bg-white/5 border border-white/10 focus:border-tidal-yellow/50 focus:bg-white/10 focus:shadow-[0_0_20px_rgba(255,220,0,0.15)] rounded-xl py-2.5 px-4 pl-12 transition-all duration-300 outline-none"
             />
             <div className="absolute right-4 flex items-center gap-2">
               {searchQuery && (

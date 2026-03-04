@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { X, Copy, CheckCircle2, Music } from 'lucide-react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { X, Copy, CheckCircle2, Music, Check } from 'lucide-react';
 import type { MergeResult } from '../hooks/useMerge';
 
 interface DuplicatesModalProps {
@@ -11,6 +11,14 @@ interface DuplicatesModalProps {
 export default function DuplicatesModal({ show, mergeResult, onClose }: DuplicatesModalProps) {
     const previousFocusRef = useRef<HTMLElement | null>(null);
     const [isClosing, setIsClosing] = useState(false);
+    const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+    const handleCopy = useCallback((text: string, index: number) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopiedIndex(index);
+            setTimeout(() => setCopiedIndex(null), 2000);
+        });
+    }, []);
 
     const handleClose = () => {
         setIsClosing(true);
@@ -46,7 +54,7 @@ export default function DuplicatesModal({ show, mergeResult, onClose }: Duplicat
     if (show && !mergeResult) return null;
 
     return (
-        <div 
+        <div
             className={`fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-black/40 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
             onClick={handleClose}
             role="dialog"
@@ -77,7 +85,7 @@ export default function DuplicatesModal({ show, mergeResult, onClose }: Duplicat
                 <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
                     <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center">
                         <p className="text-text-muted text-sm font-medium uppercase tracking-widest mb-1">Duplicates Removed</p>
-                        <p className="text-4xl font-black text-white">{mergeResult?.duplicatesRemoved ?? 0}</p>
+                        <p className="text-4xl font-black text-tidal-yellow">{mergeResult?.duplicatesRemoved ?? 0}</p>
                     </div>
 
                     {mergeResult?.duplicates && mergeResult.duplicates.length > 0 && (
@@ -86,15 +94,36 @@ export default function DuplicatesModal({ show, mergeResult, onClose }: Duplicat
                             <div className="space-y-2">
                                 {mergeResult.duplicates.map((track, index) => (
                                     <div key={index} className="flex items-center gap-4 p-3 bg-white/2 border border-white/5 rounded-lg group hover:bg-white/5 transition-colors">
-                                        <div className="w-10 h-10 bg-white/5 rounded flex items-center justify-center text-text-muted group-hover:text-tidal-yellow transition-colors shrink-0">
-                                            <Music size={20} />
+                                        <div className="w-10 h-10 bg-white/5 rounded overflow-hidden flex items-center justify-center text-text-muted group-hover:text-tidal-yellow transition-colors shrink-0">
+                                            {track.coverUrl ? (
+                                                <img src={track.coverUrl} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <Music size={20} />
+                                            )}
                                         </div>
-                                        <div className="min-w-0">
+                                        <div className="min-w-0 flex-1">
                                             <p className="font-bold text-white truncate">{track.name}</p>
-                                            <p className="text-xs text-text-muted truncate">{track.artist}</p>
+                                            <p className="text-xs text-text-muted truncate mb-1">{track.artist}</p>
+                                            <div className="flex flex-wrap gap-1">
+                                                {(Array.isArray(track.appearedIn) ? track.appearedIn : [track.appearedIn]).map((source, idx) => (
+                                                    <span key={idx} className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-white/60 border border-white/5 uppercase tracking-wider">
+                                                        {source}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
                                         <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Copy size={14} className="text-text-muted" />
+                                            <button
+                                                onClick={() => handleCopy(`${track.name} - ${track.artist}`, index)}
+                                                className="p-1.5 hover:bg-white/10 rounded-md transition-colors text-text-muted hover:text-white"
+                                                title="Copy track info"
+                                            >
+                                                {copiedIndex === index ? (
+                                                    <Check size={14} className="text-tidal-yellow" />
+                                                ) : (
+                                                    <Copy size={14} />
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
