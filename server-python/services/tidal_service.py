@@ -111,6 +111,28 @@ class TidalService:
         except Exception as e:
             logger.error(f"Error fetching mix tracks: {e}")
             raise Exception(f'Failed to fetch mix tracks: {str(e)}')
+            
+    def _get_album_tracks(self, album_id: str) -> List[dict]:
+        session = self._get_session()
+        
+        try:
+            album = session.album(album_id)
+            tracks = album.tracks()
+            
+            result = []
+            for track in tracks:
+                result.append({
+                    'id': str(track.id),
+                    'name': track.name,
+                    'artist': track.artist.name if hasattr(track.artist, 'name') else 'Unknown Artist',
+                    'coverUrl': self._get_track_cover_url(track)
+                })
+            
+            logger.info(f"Fetched {len(result)} tracks from album {album_id}")
+            return result
+        except Exception as e:
+            logger.error(f"Error fetching album tracks: {e}")
+            raise Exception(f'Failed to fetch tracks: {str(e)}')
     
     def get_playlist_by_id(self, playlist_id: str) -> dict:
         session = self._get_session()
@@ -118,6 +140,14 @@ class TidalService:
         # Special handling for favorites
         if playlist_id == 'my-favorites':
             return self._get_favorites_info()
+        
+        # Special handling for albums
+        if playlist_id.startswith('album_'):
+            return self.get_album_by_id(playlist_id[6:])
+            
+        # Special handling for mixes
+        if playlist_id.startswith('mix_'):
+            return self.get_mix_by_id(playlist_id[4:])
         
         try:
             playlist = session.playlist(playlist_id)
@@ -172,6 +202,11 @@ class TidalService:
         if playlist_id == 'my-favorites':
             return self._get_favorites_tracks()
         
+        # Special handling for albums
+        if playlist_id.startswith('album_'):
+            album_id = playlist_id[6:]
+            return self._get_album_tracks(album_id)
+            
         # Special handling for mixes
         if playlist_id.startswith('mix_'):
             mix_id = playlist_id[4:]
