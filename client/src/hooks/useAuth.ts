@@ -59,9 +59,9 @@ export function useAuth() {
           setUserCode(null);
           setAuthError(null);
         }
-      } catch {
+      } catch (err) {
         if (!isMounted) return;
-        console.error('Auth poll failed', error);
+        console.error('Auth poll failed', err);
         setAuthError('Unable to connect to server. Please check your connection and try again.');
         setAuthState('error');
       }
