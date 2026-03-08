@@ -180,7 +180,7 @@ VITE_API_BASE=http://localhost:8000
 
 ## Changelog
 
-### V2.0.2 (Latest)
+### V2.0.2 
 - **UI Redesign**: Full migration to Tailwind CSS v4 with glassmorphism theme.
 - **Support for Albums, Mixes & Favourites**: You can now merge tracks from albums, mixes, and your library favourites.
 - **Library Browser**: New modal to select playlists directly from your library.
@@ -188,7 +188,7 @@ VITE_API_BASE=http://localhost:8000
 - **Drag-and-Drop**: Reorder your merge queue visually.
 - **Bug Fixes**: Improved session recovery and batch processing cleanup.
 
-### V1.1.0
+### V1.1.0 (Legacy)
 - Real-time progress tracking via Server-Sent Events (SSE).
 - Basic duplicate removal.
 - Support for up to 200 playlists.
@@ -196,4 +196,5 @@ VITE_API_BASE=http://localhost:8000
 ## License
 
 [GNU General Public License v3.0](LICENSE)
+
 
