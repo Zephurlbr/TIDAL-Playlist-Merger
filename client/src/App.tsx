@@ -41,6 +41,8 @@ import { useAuth } from './hooks/useAuth';
 import { useMerge, type DedupeMode } from './hooks/useMerge';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+/** Maximum number of playlists that can be merged at once */
 const MAX_PLAYLISTS = 200;
 
 import type { Playlist } from './types';
@@ -81,6 +83,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
 
+  // Derived state: whether the user is actively searching the playlist grid
   const isSearching = searchQuery.trim().length > 0;
 
   const filteredPlaylists = useMemo(() => {
@@ -92,6 +95,11 @@ function App() {
     );
   }, [playlists, searchQuery]);
 
+  // ==========================================
+  //  Effects
+  // ==========================================
+
+  // Fetch user's playlists on authentication
   useEffect(() => {
     if (isAuthenticated && !myPlaylistsLoaded) {
       fetchMyPlaylists();
@@ -112,6 +120,7 @@ function App() {
     }
   }, [playlists, selectedIds]);
 
+  /** Resolve a TIDAL URL and add the resulting playlist to the grid */
   const handleAddPlaylist = async (url: string) => {
     setAuthError(null);
     const response = await axios.post(`${API_BASE}/api/playlist/resolve`, { url }, { timeout: 10000 });
@@ -126,6 +135,7 @@ function App() {
     clearMergeState();
   };
 
+  /** Remove a playlist from the grid and deselect it */
   const handleRemovePlaylist = useCallback((id: string) => {
     setPlaylists(prev => prev.filter(p => p.id !== id));
     setSelectedIds(prev => {
@@ -136,6 +146,7 @@ function App() {
     clearMergeState();
   }, [clearMergeState]);
 
+  /** Toggle a playlist's selection state */
   const handleTogglePlaylist = useCallback((id: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -149,6 +160,7 @@ function App() {
     clearMergeState();
   }, [clearMergeState]);
 
+  /** Clear all playlists and reset UI to initial state */
   const handleClear = () => {
     setPlaylists([]);
     setSelectedIds(new Set());
@@ -159,6 +171,7 @@ function App() {
     setPlaylistResetKey(prev => prev + 1);
   };
 
+  /** Kick off the merge operation with selected playlists */
   const handleMerge = async () => {
     const selectedList = playlists.filter(p => selectedIds.has(p.id)).map(p => p.id);
     await merge(selectedList, newPlaylistName, dedupeMode);
@@ -188,6 +201,7 @@ function App() {
     clearMergeState();
   };
 
+  /** Fetch the user's TIDAL library (playlists + favorites) */
   const fetchMyPlaylists = async (forceRefresh = false) => {
     if (!forceRefresh && myPlaylistsLoaded) return;
 
@@ -253,6 +267,9 @@ function App() {
     }
   }, []);
 
+  // ==========================================
+  //  Login Screen (unauthenticated)
+  // ==========================================
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center py-12">
@@ -320,6 +337,9 @@ function App() {
     );
   }
 
+  // ==========================================
+  //  Main App (authenticated)
+  // ==========================================
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 animate-fade-in">
       <div className="w-full max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -352,6 +372,7 @@ function App() {
           onRefresh={fetchMyPlaylists}
         />
 
+        {/* --- Header --- */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
           <div>
             <h1 className="text-6xl font-black tracking-tight mb-2 pb-2 bg-linear-to-r from-white to-tidal-yellow bg-clip-text text-transparent">
@@ -365,6 +386,7 @@ function App() {
           </button>
         </header>
 
+        {/* --- Status / Progress Bar --- */}
         {status && (
           <div className={`mb-8 p-5 bg-white/5 backdrop-blur-md border rounded-2xl flex items-center justify-between gap-4 animate-slide-down
           ${statusType === 'error' ? 'border-red-500/30 text-red-400' : 'border-tidal-yellow/20 text-tidal-yellow'}
@@ -384,6 +406,7 @@ function App() {
           </div>
         )}
 
+        {/* --- Add Playlist Input Panel --- */}
         <section className="glass-panel mb-8 p-6 sm:p-8">
           <AddPlaylistInput
             onAdd={handleAddPlaylist}
@@ -404,6 +427,7 @@ function App() {
           </button>
         </section>
 
+        {/* --- Playlist Grid (drag-and-drop sortable) --- */}
         {playlists.length > 0 && (
           <section className="mb-12 animate-fade-in">
             <div className="flex flex-col gap-6 mb-8">
@@ -510,6 +534,7 @@ function App() {
           </section>
         )}
 
+        {/* --- Merge Controls Panel --- */}
         <section className="glass-panel p-6 sm:p-8 space-y-8">
           <div className="space-y-2">
             <div className="flex items-center gap-2 px-1">
@@ -602,6 +627,7 @@ function App() {
           </div>
         </section>
 
+        {/* --- Footer (GitHub link) --- */}
         <footer className="mt-16 flex justify-center pb-12">
           <a
             href="https://github.com/Zephurlbr"

@@ -13,6 +13,7 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  /** Validate input then resolve the TIDAL URL via the backend */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -33,6 +34,7 @@ function AddPlaylistInput({ onAdd, disabled, maxReached }: AddPlaylistInputProps
       await onAdd(url);
       setUrl('');
     } catch (err: unknown) {
+      // Extract a user-friendly message from Axios error responses
       const axiosError = err as { response?: { data?: { detail?: string | string[] } } };
       const detail = axiosError.response?.data?.detail;
 

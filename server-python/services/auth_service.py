@@ -1,7 +1,8 @@
+"""Handles TIDAL OAuth device-linking authentication and session persistence."""
+
 import os
 import json
 import logging
-import traceback
 import tidalapi
 from typing import Optional, Tuple
 from dotenv import load_dotenv
@@ -12,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 TOKEN_FILE = os.getenv('TOKEN_FILE', 'tidal_session.json')
 
+
 class AuthService:
+    """Manages TIDAL session lifecycle: login, persistence, and logout."""
     def __init__(self):
         self.session: Optional[tidalapi.Session] = None
         self._oauth_future = None
@@ -25,6 +28,7 @@ class AuthService:
         return self.session
     
     def load_session(self) -> bool:
+        """Try to restore a session from the saved token file. Returns True on success."""
         session = self._get_session()
         try:
             if not os.path.exists(TOKEN_FILE):
@@ -66,6 +70,7 @@ class AuthService:
             return False
     
     def save_session(self):
+        """Persist the current session tokens to disk."""
         session = self._get_session()
         try:
             data = {
@@ -81,10 +86,12 @@ class AuthService:
             logger.error(f"Error saving session: {e}")
     
     def is_authenticated(self) -> bool:
+        """Check if the current session is valid."""
         session = self._get_session()
         return session.check_login()
     
     def check_login(self) -> bool:
+        """Check if the pending OAuth flow has completed. Saves session on success."""
         if self._oauth_future is None:
             return False
         
@@ -127,6 +134,7 @@ class AuthService:
         return {'authenticated': False}
     
     def initiate_login(self) -> Tuple[str, str]:
+        """Start the OAuth device-linking flow. Returns (verification_url, user_code)."""
         session = self._get_session()
         logger.info("Initiating OAuth login...")
         login, future = session.login_oauth()
@@ -142,6 +150,7 @@ class AuthService:
         return self._login_url
     
     def logout(self):
+        """Clear the session and delete the saved token file."""
         logger.info("Logging out...")
         self.session = None
         self._oauth_future = None

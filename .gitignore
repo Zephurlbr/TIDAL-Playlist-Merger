@@ -33,3 +33,7 @@ Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
+
+# Asset source folders
+Assets/Vids/
+Assets/old/

@@ -1,3 +1,5 @@
+"""API routes for playlist resolution, merge, and user library access."""
+
 import json
 import asyncio
 from typing import List
@@ -25,6 +27,7 @@ VALID_DEDUPE_MODES = ["off", "inter", "intra", "full"]
 
 @router.get("/me/playlists")
 async def get_my_playlists(_: bool = Depends(require_auth)):
+    """Return all playlists from the user's TIDAL library."""
     try:
         playlists = await to_thread.run_sync(
             tidal_service.get_user_playlists
@@ -35,6 +38,7 @@ async def get_my_playlists(_: bool = Depends(require_auth)):
 
 @router.get("/me/favorites/count")
 async def get_favorites_count(_: bool = Depends(require_auth)):
+    """Return the total count of the user's favorite tracks."""
     try:
         result = await to_thread.run_sync(
             tidal_service.get_favorites_count
@@ -45,6 +49,7 @@ async def get_favorites_count(_: bool = Depends(require_auth)):
 
 @router.post("/playlist/resolve")
 async def resolve_playlist(request: ResolveRequest, _: bool = Depends(require_auth)):
+    """Parse a TIDAL URL and fetch playlist/album/mix metadata."""
     parsed = extract_playlist_id(request.url)
     if not parsed['success']:
         raise HTTPException(status_code=400, detail=parsed['error'])
@@ -70,6 +75,7 @@ async def resolve_playlist(request: ResolveRequest, _: bool = Depends(require_au
 
 @router.post("/merge")
 async def merge_playlists(request: MergeRequest, _: bool = Depends(require_auth)):
+    """Merge multiple playlists into one, streaming progress via SSE."""
     if not request.playlistIds:
         raise HTTPException(status_code=400, detail="No playlists provided")
     

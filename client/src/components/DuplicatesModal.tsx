@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Copy, CheckCircle2, Music, Check } from 'lucide-react';
-import type { MergeResult } from '../hooks/useMerge';
+import type { MergeResult } from '../types';
 
 interface DuplicatesModalProps {
     show: boolean;
@@ -13,6 +13,7 @@ export default function DuplicatesModal({ show, mergeResult, onClose }: Duplicat
     const [isClosing, setIsClosing] = useState(false);
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
+    /** Copy track info to clipboard and show a brief ✓ checkmark */
     const handleCopy = useCallback((text: string, index: number) => {
         navigator.clipboard.writeText(text).then(() => {
             setCopiedIndex(index);
@@ -20,6 +21,7 @@ export default function DuplicatesModal({ show, mergeResult, onClose }: Duplicat
         });
     }, []);
 
+    /** Animated close: triggers exit animation, then calls onClose after 200ms */
     const handleClose = () => {
         setIsClosing(true);
         setTimeout(() => {

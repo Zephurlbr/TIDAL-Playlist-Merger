@@ -1,6 +1,4 @@
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+"""Authentication routes for TIDAL OAuth device-linking flow."""
 
 from fastapi import APIRouter, HTTPException
 
@@ -10,6 +8,7 @@ router = APIRouter(tags=["auth"])
 
 @router.get("/login")
 async def login():
+    """Start the device-linking OAuth flow (or return existing pending URL)."""
     try:
         if auth_service.is_login_pending():
             url = auth_service.get_login_url()
@@ -22,6 +21,7 @@ async def login():
 
 @router.get("/check")
 async def check_login():
+    """Poll whether the user has completed the TIDAL authorization."""
     try:
         completed = auth_service.check_login()
         return {"completed": completed, "authenticated": auth_service.is_authenticated()}
@@ -30,6 +30,7 @@ async def check_login():
 
 @router.get("/status")
 async def get_status():
+    """Get the current authentication status and user info."""
     try:
         if not auth_service.is_authenticated():
             auth_service.load_session()
@@ -39,6 +40,7 @@ async def get_status():
 
 @router.post("/logout")
 async def logout():
+    """Log out and clear the saved session."""
     try:
         auth_service.logout()
         return {"success": True}

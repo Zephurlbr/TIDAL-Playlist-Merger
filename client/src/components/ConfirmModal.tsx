@@ -25,6 +25,7 @@ export default function ConfirmModal({
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const [isClosing, setIsClosing] = useState(false);
 
+  /** Animated close: triggers exit animation, then calls onCancel after 200ms */
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
@@ -58,7 +59,7 @@ export default function ConfirmModal({
   if (!show && !isClosing) return null;
 
   return (
-    <div 
+    <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 backdrop-blur-md bg-black/40 ${isClosing ? 'animate-fade-out' : 'animate-fade-in'}`}
       role="dialog"
       aria-modal="true"
@@ -99,8 +100,8 @@ export default function ConfirmModal({
           </button>
           <button
             onClick={() => {
-              onConfirm();
-              handleClose();
+              onConfirm();   // Execute the confirmed action
+              handleClose(); // Then animate the modal closed
             }}
             className={`flex-1 font-extrabold py-3 px-6 rounded-xl transition-all duration-300 active:scale-95 shadow-lg
               ${danger

@@ -1,3 +1,5 @@
+"""Service that orchestrates the playlist merge operation with deduplication and progress tracking."""
+
 import logging
 import asyncio
 from typing import List, Callable, Optional, Dict, Set, Any
@@ -8,7 +10,9 @@ logger = logging.getLogger(__name__)
 MAX_DUPLICATES_RETURNED = 200
 TRACK_LIMIT = 10000
 
+
 class MergeService:
+    """Merges multiple playlists into one new playlist on TIDAL."""
     async def merge_playlists(
         self,
         playlist_ids: List[str],
@@ -16,6 +20,12 @@ class MergeService:
         on_progress: Optional[Callable[[dict], Any]] = None,
         dedupe_mode: str = "off"
     ) -> dict:
+        """
+        Merge multiple playlists into a single new TIDAL playlist.
+
+        Flow: fetch tracks → deduplicate → create playlist → add tracks in batches.
+        Sends real-time progress updates via the on_progress callback.
+        """
         from . import tidal_service
         
         logger.info(f"Merging playlists: {playlist_ids} into {new_playlist_name} (dedupe_mode={dedupe_mode})")
@@ -76,7 +86,12 @@ class MergeService:
                     tracks_in_this_playlist.add(track_id)
                     
                     should_add_track = True
-                    
+
+                    # --- Deduplication logic ---
+                    # 'off'   = keep everything
+                    # 'inter' = remove tracks seen in previous playlists
+                    # 'intra' = remove tracks duplicated within the same playlist
+                    # 'full'  = both inter + intra
                     if dedupe_mode == 'off':
                         should_add_track = True
                     
@@ -140,7 +155,7 @@ class MergeService:
                         'name': info['name'],
                         'artist': info['artist'],
                         'coverUrl': info.get('coverUrl'),
-                        'appearedIn': f"{info['playlists'][0]} ({count + 1}x)",
+                        'appearedIn': [f"{info['playlists'][0]} ({count + 1}x)"],
                         'type': 'intra'
                     })
         

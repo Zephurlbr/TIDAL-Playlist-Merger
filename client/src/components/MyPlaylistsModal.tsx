@@ -97,6 +97,10 @@ export default function MyPlaylistsModal({
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const [isClosing, setIsClosing] = useState(false);
 
+  /**
+   * Animated close: triggers exit animation, then calls onClose after 200ms.
+   * This pattern is shared across all modals.
+   */
   const handleClose = () => {
     setIsClosing(true);
     setTimeout(() => {
@@ -105,6 +109,7 @@ export default function MyPlaylistsModal({
     }, 200);
   };
 
+  // Focus management: trap focus inside the modal and restore on close
   useEffect(() => {
     if (!show) return;
 

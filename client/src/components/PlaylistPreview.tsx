@@ -3,6 +3,12 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Trash2, Music, Check } from 'lucide-react';
 
+/**
+ * A single playlist card in the sortable grid.
+ * Supports drag-and-drop reordering, selection toggling, and removal.
+ * Shows cover art (single image, 4-tile mosaic, or placeholder icon).
+ */
+
 interface PlaylistPreviewProps {
   id: string;
   name: string;
@@ -53,6 +59,7 @@ const PlaylistPreview = memo(function PlaylistPreview({
 
   const hasFallbacks = fallbackCovers && fallbackCovers.length > 0;
 
+  // When dragging, render only a ghost placeholder instead of the full card
   if (isDragging) {
     return (
       <div
@@ -70,6 +77,7 @@ const PlaylistPreview = memo(function PlaylistPreview({
       className={`group flex items-center gap-4 p-3 bg-white/5 border rounded-xl transition-all duration-300 hover:bg-white/10 hover:shadow-2xl
         ${selected ? 'border-tidal-yellow ring-4 ring-tidal-yellow/10' : 'border-white/10'}`}
     >
+      {/* --- Cover Art (single / 4-tile mosaic / fallback icon) --- */}
       <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-lg">
         {coverUrl && !imageError ? (
           <img src={coverUrl} alt={name} className="w-full h-full object-cover" onError={handleImageError} />
@@ -103,6 +111,7 @@ const PlaylistPreview = memo(function PlaylistPreview({
           </div>
           <div className="min-w-0">
             <span className="block font-bold text-lg truncate">{name}</span>
+            {/* Type badge with color coding: playlist/album/mix/favorites */}
             <div className="flex items-center gap-2 mt-1">
               {type && (
                 <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${type === 'mix' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
@@ -123,6 +132,7 @@ const PlaylistPreview = memo(function PlaylistPreview({
         </label>
       </div>
 
+      {/* Drag handle (only area that triggers drag) */}
       <div
         className="p-2 -m-2 cursor-grab active:cursor-grabbing text-text-muted hover:text-white transition-colors"
         {...attributes}

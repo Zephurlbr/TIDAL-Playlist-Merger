@@ -1,11 +1,17 @@
+"""Service for interacting with the TIDAL API via tidalapi."""
+
 import logging
 from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class TidalService:
+    """Wraps tidalapi to provide playlist, album, mix, and favorites operations."""
+    # --- Helpers ---
+
     def _get_track_cover_url(self, track) -> Optional[str]:
-        """Extract 320x320 cover URL from a track object."""
+        """Extract a 320×320 cover URL from a track's album art."""
         try:
             if hasattr(track, 'album') and track.album:
                 album = track.album
@@ -20,13 +26,17 @@ class TidalService:
             return None
 
     def _get_session(self):
+        """Get the authenticated tidalapi session, or raise if not logged in."""
         from . import auth_service
         session = auth_service.get_session_object()
         if session is None:
             raise Exception('Not authenticated. Please log in again.')
         return session
     
+    # --- Album & Mix Support ---
+
     def get_album_by_id(self, album_id: str) -> dict:
+        """Fetch album metadata by numeric ID. Returns playlist-compatible dict."""
         session = self._get_session()
         
         try:
@@ -57,6 +67,7 @@ class TidalService:
             raise Exception(f'Failed to fetch album: {str(e)}')
     
     def get_mix_by_id(self, mix_id: str) -> dict:
+        """Fetch mix metadata by ID. Returns playlist-compatible dict."""
         session = self._get_session()
         
         try:
@@ -91,6 +102,7 @@ class TidalService:
             raise Exception(f'Failed to fetch mix: {str(e)}')
     
     def _get_mix_tracks(self, mix_id: str) -> List[dict]:
+        """Fetch all tracks from a TIDAL mix."""
         session = self._get_session()
         
         try:
@@ -113,6 +125,7 @@ class TidalService:
             raise Exception(f'Failed to fetch mix tracks: {str(e)}')
             
     def _get_album_tracks(self, album_id: str) -> List[dict]:
+        """Fetch all tracks from a TIDAL album."""
         session = self._get_session()
         
         try:
@@ -134,7 +147,10 @@ class TidalService:
             logger.error(f"Error fetching album tracks: {e}")
             raise Exception(f'Failed to fetch tracks: {str(e)}')
     
+    # --- Playlist CRUD ---
+
     def get_playlist_by_id(self, playlist_id: str) -> dict:
+        """Fetch playlist/album/mix/favorites info by ID. Routes to the correct handler."""
         session = self._get_session()
         
         # Special handling for favorites
@@ -196,6 +212,7 @@ class TidalService:
             raise Exception(f'Failed to fetch playlist: {str(e)}')
     
     def get_playlist_tracks(self, playlist_id: str) -> List[dict]:
+        """Fetch all tracks from a playlist/album/mix/favorites, with pagination."""
         session = self._get_session()
         
         # Special handling for favorites
@@ -245,6 +262,7 @@ class TidalService:
             raise Exception(f'Failed to fetch tracks: {str(e)}')
     
     def create_playlist(self, title: str, description: str = '') -> dict:
+        """Create a new user playlist on TIDAL."""
         session = self._get_session()
         
         try:
@@ -261,6 +279,7 @@ class TidalService:
             raise Exception(f'Failed to create playlist: {str(e)}')
     
     def add_tracks_to_playlist(self, playlist_id: str, track_ids: List[str], on_progress=None) -> None:
+        """Add tracks to a playlist in batches of 100, with optional progress callback."""
         if not track_ids:
             logger.warning("No tracks to add")
             return
@@ -294,6 +313,7 @@ class TidalService:
             raise Exception(f'Failed to add tracks: {str(e)}')
     
     def delete_playlist(self, playlist_id: str) -> bool:
+        """Delete a playlist. Returns True on success, False on failure."""
         session = self._get_session()
         
         try:
@@ -305,7 +325,10 @@ class TidalService:
             logger.error(f"Error deleting playlist {playlist_id}: {e}")
             return False
 
+    # --- User Library ---
+
     def get_user_playlists(self) -> List[dict]:
+        """Fetch all of the user's playlists, plus a 'My Favorites' pseudo-playlist."""
         session = self._get_session()
         
         try:
@@ -425,8 +448,10 @@ class TidalService:
             logger.error(f"Error fetching user playlists: {e}")
             raise Exception(f'Failed to fetch user playlists: {str(e)}')
 
+    # --- Favorites ---
+
     def get_favorites_count(self) -> dict:
-        """Get favorite tracks count using library method."""
+        """Get the total number of favorite tracks."""
         session = self._get_session()
         favorites = session.user.favorites
         

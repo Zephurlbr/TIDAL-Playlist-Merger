@@ -1,107 +1,67 @@
 @import "tailwindcss";
 
+/* =============================
+   Theme: Design Tokens
+   ============================= */
 @theme {
+  /* --- Brand Colors --- */
   --color-tidal-black: #000000;
   --color-tidal-gray: #0a0a0a;
   --color-tidal-yellow: #ffdc00;
   --color-tidal-white: #ffffff;
+
+  /* --- Neutral / Text --- */
   --color-text-muted: #b3b3b3;
+
+  /* --- Glass / Surface --- */
   --color-glass-bg: rgba(255, 255, 255, 0.05);
   --color-glass-border: rgba(255, 255, 255, 0.1);
   --color-glow-yellow: rgba(255, 220, 0, 0.3);
 
+  /* --- Entrance Animations --- */
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
+  /* --- Exit Animations --- */
   @keyframes fadeOut {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
+    from { opacity: 1; }
+    to   { opacity: 0; }
   }
 
   @keyframes slideDownOut {
-    from {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    to {
-      opacity: 0;
-      transform: translateY(20px);
-    }
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(20px); }
   }
 
+  /* --- Looping Animations --- */
   @keyframes pulseGlow {
-
-    0%,
-    100% {
-      box-shadow: 0 0 5px var(--color-glow-yellow), 0 0 20px var(--color-glow-yellow);
-    }
-
-    50% {
-      box-shadow: 0 0 20px var(--color-glow-yellow), 0 0 40px var(--color-glow-yellow);
-    }
+    0%, 100% { box-shadow: 0 0 5px var(--color-glow-yellow), 0 0 20px var(--color-glow-yellow); }
+    50%      { box-shadow: 0 0 20px var(--color-glow-yellow), 0 0 40px var(--color-glow-yellow); }
   }
 
   @keyframes breathe {
-
-    0%,
-    100% {
-      box-shadow: 0 0 5px var(--color-tidal-yellow);
-    }
-
-    50% {
-      box-shadow: 0 0 15px var(--color-tidal-yellow), 0 0 25px rgba(255, 220, 0, 0.2);
-    }
+    0%, 100% { box-shadow: 0 0 5px var(--color-tidal-yellow); }
+    50%      { box-shadow: 0 0 15px var(--color-tidal-yellow), 0 0 25px rgba(255, 220, 0, 0.2); }
   }
 
   @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-
-    100% {
-      background-position: 200% 0;
-    }
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
 
+  /* --- Animation Tokens --- */
   --animate-fade-in: fadeIn 0.4s ease-out;
   --animate-slide-up: slideUp 0.2s cubic-bezier(0.2, 0, 0, 1);
   --animate-slide-down: slideDown 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -112,17 +72,26 @@
   --animate-shimmer: shimmer 2s linear infinite;
 }
 
+/* =============================
+   Base Styles
+   ============================= */
 @layer base {
   body {
     @apply bg-linear-to-br from-black via-[#1a1a1a] to-black text-white min-h-screen m-0 font-sans antialiased;
   }
 }
 
+/* =============================
+   Component Classes
+   ============================= */
 @layer components {
+
+  /* --- Glass Panel (card container) --- */
   .glass-panel {
     @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl;
   }
 
+  /* --- Primary Button (yellow CTA) --- */
   .btn-primary {
     @apply bg-tidal-yellow text-tidal-black font-extrabold py-2.5 px-8 rounded-xl transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
@@ -132,18 +101,23 @@
     box-shadow: 0 15px 30px rgba(255, 220, 0, 0.3);
   }
 
+  .btn-primary:focus-visible {
+    @apply ring-2 ring-tidal-yellow/50 ring-offset-2 ring-offset-tidal-black outline-none;
+  }
+
+  /* --- Secondary Button (ghost/outline) --- */
   .btn-secondary {
     @apply bg-transparent text-text-muted border border-white/10 py-2 px-4 rounded-lg transition-all duration-300 hover:text-white hover:border-white disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
+  .btn-secondary:focus-visible {
+    @apply ring-2 ring-white/30 ring-offset-2 ring-offset-tidal-black outline-none;
+  }
+
+  /* --- Outline Yellow Button (Browse My Playlists) --- */
   .btn-outline-yellow {
-    @apply py-2.5 px-8 rounded-xl font-bold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
-    background-color: transparent;
-    color: var(--color-tidal-yellow);
+    @apply py-2.5 px-8 rounded-xl font-bold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed bg-transparent text-tidal-yellow flex justify-center items-center;
     border: 2px solid rgba(255, 220, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .btn-outline-yellow:hover:not(:disabled) {
@@ -152,6 +126,7 @@
     box-shadow: 0 0 20px rgba(255, 220, 0, 0.15);
   }
 
+  /* --- Custom Scrollbar --- */
   .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
@@ -173,16 +148,11 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.25);
   }
-
-  .btn-primary:focus-visible {
-    @apply ring-2 ring-tidal-yellow/50 ring-offset-2 ring-offset-tidal-black outline-none;
-  }
-
-  .btn-secondary:focus-visible {
-    @apply ring-2 ring-white/30 ring-offset-2 ring-offset-tidal-black outline-none;
-  }
 }
 
+/* =============================
+   Accessibility: Reduced Motion
+   ============================= */
 @media (prefers-reduced-motion: reduce) {
 
   *,

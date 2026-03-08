@@ -1,20 +1,27 @@
+/**
+ * Accepted TIDAL URL patterns for playlists, albums, and mixes.
+ * Order matters: playlist patterns are checked first.
+ */
 const PATTERNS = [
+  // Playlist URLs
   /listen\.tidal\.com\/playlist\/([a-zA-Z0-9-]+)/i,
   /tidal\.com\/.*playlist\/([a-zA-Z0-9-]+)/i,
   /open\.tidal\.com\/playlist\/([a-zA-Z0-9-]+)/i,
+  // Raw UUID or long ID
   /^([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$/i,
   /^([a-zA-Z0-9-]{20,})$/,
-  // Albums
+  // Album URLs
   /tidal\.com\/album\/[0-9]+/i,
   /listen\.tidal\.com\/album\/[0-9]+/i,
-  // Mixes
+  // Mix URLs
   /tidal\.com\/mix\/[a-zA-Z0-9-]+/i,
   /listen\.tidal\.com\/mix\/[a-zA-Z0-9-]+/i,
 ];
 
+/** Quick client-side check that the input looks like a valid TIDAL URL or ID */
 export function validatePlaylistUrl(input: string): { valid: boolean; error?: string } {
   const trimmed = input.trim();
-  
+
   if (!trimmed) {
     return { valid: false, error: 'Please enter a playlist URL or ID' };
   }

@@ -1,5 +1,9 @@
+"""Parse and validate TIDAL URLs, extracting content IDs for playlists, albums, and mixes."""
+
 import re
 from typing import Optional, Dict, Any
+
+# --- Playlist URL patterns ---
 
 PLAYLIST_PATTERNS = [
     re.compile(r'listen\.tidal\.com/playlist/([a-zA-Z0-9-]+)', re.I),
@@ -10,12 +14,14 @@ PLAYLIST_PATTERNS = [
     re.compile(r'^([a-zA-Z0-9-]{20,})$')
 ]
 
+# --- Album URL patterns ---
 ALBUM_PATTERNS = [
     re.compile(r'listen\.tidal\.com/album/([0-9]+)', re.I),
     re.compile(r'tidal\.com/.*album/([0-9]+)', re.I),
     re.compile(r'tidal\.com/album/([0-9]+)', re.I)
 ]
 
+# --- Mix URL patterns ---
 MIX_PATTERNS = [
     re.compile(r'listen\.tidal\.com/mix/([a-zA-Z0-9_-]+)', re.I),
     re.compile(r'tidal\.com/.*mix/([a-zA-Z0-9_-]+)', re.I),
@@ -23,6 +29,7 @@ MIX_PATTERNS = [
 ]
 
 def extract_playlist_id(input_str: str) -> Dict[str, Any]:
+    """Extract a content ID and type from a TIDAL URL or raw ID string."""
     trimmed = input_str.strip()
     
     for pattern in PLAYLIST_PATTERNS:

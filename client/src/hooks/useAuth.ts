@@ -5,6 +5,10 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 export type AuthState = 'idle' | 'checking' | 'polling' | 'authenticated' | 'error';
 
+/**
+ * Hook that manages TIDAL OAuth device-linking authentication.
+ * States: idle → polling (waiting for user to authorize) → authenticated
+ */
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>('idle');
   const [loginUrl, setLoginUrl] = useState<string | null>(null);
@@ -12,48 +16,59 @@ export function useAuth() {
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | null = null;
     let isMounted = true;
 
-    const checkAuthStatus = async () => {
+    // Run a single check on mount or when returning to idle after logout
+    const initCheck = async () => {
+      if (authState !== 'idle') return;
+      
       try {
         const response = await axios.get(`${API_BASE}/auth/status`, { timeout: 5000 });
         if (!isMounted) return;
-        
+
         if (response.data.authenticated) {
+          setAuthState('authenticated');
+        }
+      } catch {
+        if (!isMounted) return;
+        setAuthState('error');
+        setAuthError('Unable to connect to server. Please check your connection and try again.');
+      }
+    };
+
+    initCheck();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [authState]);
+
+  // Handle polling when in 'polling' state
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    let isMounted = true;
+
+    const pollAuthStatus = async () => {
+      try {
+        const checkResponse = await axios.get(`${API_BASE}/auth/check`, { timeout: 5000 });
+        if (!isMounted) return;
+
+        if (checkResponse.data.completed && checkResponse.data.authenticated) {
           setAuthState('authenticated');
           setLoginUrl(null);
           setUserCode(null);
           setAuthError(null);
-        } else if (authState === 'polling') {
-          const checkResponse = await axios.get(`${API_BASE}/auth/check`, { timeout: 5000 });
-          if (!isMounted) return;
-          
-          if (checkResponse.data.completed && checkResponse.data.authenticated) {
-            setAuthState('authenticated');
-            setLoginUrl(null);
-            setUserCode(null);
-            setAuthError(null);
-          }
         }
-      } catch (error) {
+      } catch {
         if (!isMounted) return;
-        console.error('Auth check failed', error);
-        
+        console.error('Auth poll failed', error);
         setAuthError('Unable to connect to server. Please check your connection and try again.');
-        
-        if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
         setAuthState('error');
       }
     };
 
-    checkAuthStatus();
-
     if (authState === 'polling') {
-      intervalId = setInterval(checkAuthStatus, 2000);
+      intervalId = setInterval(pollAuthStatus, 2000);
     }
 
     return () => {
@@ -62,6 +77,7 @@ export function useAuth() {
     };
   }, [authState]);
 
+  /** Initiate the device-linking OAuth flow */
   const login = async () => {
     setAuthError(null);
     try {
