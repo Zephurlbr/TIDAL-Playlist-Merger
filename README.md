@@ -65,13 +65,13 @@ git clone https://github.com/Zephurlbr/TIDAL-Playlist-Merger.git
 cd TIDAL-Playlist-Merger
 ```
 
-```bash
 # Windows
+```bash
 start.bat
 ```
 
-```bash
 # macOS/Linux
+```bash
 chmod +x start.sh && ./start.sh
 ```
 
@@ -107,7 +107,7 @@ https://open.tidal.com/playlist/<uuid>
 This project wouldn't be possible without [tidalapi](https://github.com/EbbLabs/python-tidal).
 
 - **Backend:** [Python](https://www.python.org/), [FastAPI](https://github.com/tiangolo/fastapi), [uvicorn](https://github.com/encode/uvicorn), [tidalapi](https://github.com/EbbLabs/python-tidal)
-- **Frontend:** [React](https://github.com/facebook/react), [TypeScript](https://github.com/microsoft/TypeScript), [Vite](https://github.com/vitejs/vite), [Tailwind CSS v4](https://github.com/tailwindlabs/tailwindcss), [Lucide React](https://github.com/lucide-react/lucide), [Dnd Kit](https://github.com/clauderic/dnd-kit)
+- **Frontend:** [React](https://github.com/facebook/react), [TypeScript](https://github.com/microsoft/TypeScript), [Vite](https://github.com/vitejs/vite), [Tailwind CSS v4](https://github.com/tailwindlabs/tailwindcss), [Lucide Icons](https://github.com/lucide-icons/lucide), [Dnd Kit](https://github.com/clauderic/dnd-kit)
 - **Auth:** TIDAL device linking flow
 
 ## Notes
@@ -196,3 +196,4 @@ VITE_API_BASE=http://localhost:8000
 ## License
 
 [GNU General Public License v3.0](LICENSE)
+
