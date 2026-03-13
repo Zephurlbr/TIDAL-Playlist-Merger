@@ -55,7 +55,7 @@ Merge multiple TIDAL playlists into one with duplicate track removal. No API key
 
 ## Quick Start
 
-**Prerequisites:** [Python 3.9+](https://www.python.org/downloads/), [Node.js 18+](https://nodejs.org/en/download), TIDAL account
+**Prerequisites:** [Python 3.9+](https://www.python.org/downloads/), [Node.js 18+](https://nodejs.org/en/download),[Git](https://github.com/git-guides/install-git) TIDAL account
 
 ```bash
 git clone https://github.com/Zephurlbr/TIDAL-Playlist-Merger.git
@@ -196,5 +196,6 @@ VITE_API_BASE=http://localhost:8000
 ## License
 
 [GNU General Public License v3.0](LICENSE)
+
 
 
